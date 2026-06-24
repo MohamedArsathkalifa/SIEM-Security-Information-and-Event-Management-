@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🛡️ SIEM - Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; }
+
+    section {
+      display:flex; justify-content:center; align-items:center;
+      width:100%; height:100vh;
+      background-image:url('bg.jpg');
+      background-size:cover; background-position:center;
+    }
+
+    /* ---- glassmorphism box ---- */
+    .box {
+      position:relative; width:400px;
+      background:transparent;
+      border:2px solid rgba(255,255,255,.5);
+      border-radius:20px;
+      display:flex; justify-content:center; align-items:center;
+      backdrop-filter:blur(15px);
+      padding:40px 0;
+      transition: height 0.4s;
+    }
+
+    /* panels */
+    .panel { display:none; flex-direction:column; align-items:center; width:100%; }
+    .panel.active { display:flex; }
+
+    h2 { font-size:2em; color:#fff; text-align:center; margin-bottom:5px; }
+
+    .input-box {
+      position:relative; width:310px; margin:28px 0;
+      border-bottom:2px solid #fff;
+    }
+    .input-box label {
+      position:absolute; top:50%; left:5px;
+      transform:translateY(-50%);
+      font-size:1em; color:#fff; pointer-events:none; transition:.5s;
+    }
+    .input-box input:focus ~ label,
+    .input-box input:valid ~ label { top:-5px; }
+    .input-box input {
+      width:100%; height:50px; background:transparent;
+      border:none; outline:none; font-size:1em; color:#fff;
+      padding:0 45px 0 5px;
+    }
+    
+    /* Eye button for password toggle */
+    .input-box .eye-btn {
+      position:absolute; right:8px; top:50%;
+      transform:translateY(-50%);
+      background:none; border:none;
+      color:#fff; cursor:pointer;
+      font-size:1.1em;
+      padding:5px 10px;
+      transition:all 0.3s;
+      opacity:0.7;
+    }
+    .input-box .eye-btn:hover {
+      opacity:1;
+      transform:translateY(-50%) scale(1.1);
+    }
+
+    .remember-forget {
+      width:310px; margin:-15px 0 15px;
+      font-size:.9em; color:#fff;
+      display:flex; justify-content:space-between;
+    }
+    .remember-forget label input { margin-right:3px; }
+    .remember-forget a, .link-btn {
+      color:#fff; text-decoration:none;
+      background:none; border:none; cursor:pointer;
+      font-size:.9em; font-family:'Poppins',sans-serif;
+    }
+    .remember-forget a:hover, .link-btn:hover { text-decoration:underline; }
+
+    .btn {
+      width:310px; height:40px; background:#fff;
+      border:none; outline:none; border-radius:40px;
+      cursor:pointer; font-size:1em; color:#000;
+      font-weight:500; transition:all 0.3s;
+    }
+    .btn:hover { background:rgba(255,255,255,.9); box-shadow:0 0 20px rgba(255,255,255,.5); }
+    .btn:disabled { opacity:.6; cursor:not-allowed; }
+
+    .bottom-link {
+      font-size:.9em; color:#fff; text-align:center;
+      margin:22px 0 5px;
+    }
+    .bottom-link a, .bottom-link button {
+      color:#fff; text-decoration:none; font-weight:600;
+      background:none; border:none; cursor:pointer;
+      font-size:.9em; font-family:'Poppins',sans-serif;
+    }
+    .bottom-link a:hover, .bottom-link button:hover { text-decoration:underline; }
+
+    .msg {
+      width:310px; padding:10px; border-radius:8px;
+      margin-bottom:12px; text-align:center; display:none;
+      font-size:.9em;
+    }
+    .error   { background:rgba(239,68,68,.9);  color:#fff; }
+    .success { background:rgba(16,185,129,.9); color:#fff; }
+
+    .hint { color:rgba(255,255,255,.7); font-size:.8em; margin-bottom:15px; text-align:center; width:310px; }
+  </style>
+</head>
+<body>
+<section>
+  <div class="box">
+
+    <!-- ===== LOGIN PANEL ===== -->
+    <div class="panel active" id="loginPanel">
+      <h2>🛡️ Login</h2>
+      <div id="loginMsg" class="msg"></div>
+      <div class="input-box">
+        <input type="text" id="lUser" required>
+        <label>Username</label>
+      </div>
+      <div class="input-box">
+        <input type="password" id="lPass" required>
+        <label>Password</label>
+        <button type="button" class="eye-btn" onclick="togglePassword('lPass', this)">
+          <ion-icon name="eye-outline"></ion-icon>
+        </button>
+      </div>
+      <div class="remember-forget">
+        <label><input type="checkbox"> Remember Me</label>
+        <button class="link-btn" onclick="show('forgotPanel')">Forgot Password?</button>
+      </div>
+      <button class="btn" id="lBtn" onclick="handleLogin()">Login</button>
+      <div class="bottom-link">
+        <p>Don't have an account? <button onclick="show('registerPanel')">Register</button></p>
+      </div>
+    </div>
+
+    <!-- ===== REGISTER PANEL ===== -->
+    <div class="panel" id="registerPanel">
+      <h2>📝 Register</h2>
+      <div id="regMsg" class="msg"></div>
+      <div class="input-box">
+        <input type="text" id="rUser" required>
+        <label>Username</label>
+      </div>
+      <div class="input-box">
+        <input type="email" id="rEmail" required>
+        <label>Email</label>
+      </div>
+      <div class="input-box">
+        <input type="password" id="rPass" required>
+        <label>Password</label>
+        <button type="button" class="eye-btn" onclick="togglePassword('rPass', this)">
+          <ion-icon name="eye-outline"></ion-icon>
+        </button>
+      </div>
+      <div class="input-box">
+        <input type="password" id="rPass2" required>
+        <label>Confirm Password</label>
+        <button type="button" class="eye-btn" onclick="togglePassword('rPass2', this)">
+          <ion-icon name="eye-outline"></ion-icon>
+        </button>
+      </div>
+      <button class="btn" id="rBtn" onclick="handleRegister()">Create Account</button>
+      <div class="bottom-link">
+        <p>Already have an account? <button onclick="show('loginPanel')">Login</button></p>
+      </div>
+    </div>
+
+    <!-- ===== FORGOT PASSWORD PANEL ===== -->
+    <div class="panel" id="forgotPanel">
+      <h2>🔑 Reset Password</h2>
+      <p class="hint">Enter your username & registered email to reset.</p>
+      <div id="fpMsg" class="msg"></div>
+      <div class="input-box">
+        <input type="text" id="fpUser" required>
+        <label>Username</label>
+      </div>
+      <div class="input-box">
+        <input type="email" id="fpEmail" required>
+        <label>Registered Email</label>
+      </div>
+      <div class="input-box">
+        <input type="password" id="fpNew" required>
+        <label>New Password</label>
+        <button type="button" class="eye-btn" onclick="togglePassword('fpNew', this)">
+          <ion-icon name="eye-outline"></ion-icon>
+        </button>
+      </div>
+      <button class="btn" id="fpBtn" onclick="handleForgot()">Reset Password</button>
+      <div class="bottom-link">
+        <p><button onclick="show('loginPanel')">← Back to Login</button></p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+<script>
+  const API = 'http://localhost:5000/api';
+
+  // ========== PASSWORD TOGGLE FUNCTION ==========
+  function togglePassword(inputId, button) {
+    const input = document.getElementById(inputId);
+    const icon = button.querySelector('ion-icon');
+    
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.setAttribute('name', 'eye-off-outline');
+    } else {
+      input.type = 'password';
+      icon.setAttribute('name', 'eye-outline');
+    }
+  }
+
+  function show(panelId) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(panelId).classList.add('active');
+    // clear messages
+    document.querySelectorAll('.msg').forEach(m => { m.style.display='none'; m.textContent=''; });
+  }
+
+  function showMsg(id, text, type) {
+    const el = document.getElementById(id);
+    el.className = 'msg ' + type;
+    el.textContent = text;
+    el.style.display = 'block';
+  }
+
+  // ---------- LOGIN ----------
+  async function handleLogin() {
+    const username = document.getElementById('lUser').value.trim();
+    const password = document.getElementById('lPass').value;
+    const btn = document.getElementById('lBtn');
+    if (!username || !password) return showMsg('loginMsg','Fill all fields','error');
+    btn.disabled = true; btn.textContent = 'Logging in...';
+    try {
+      const r = await fetch(`${API}/auth/login`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({username, password})
+      });
+      const d = await r.json();
+      if (r.ok) {
+        localStorage.setItem('siem_auth_token', d.access_token);
+        localStorage.setItem('siem_username', d.username || username);
+        showMsg('loginMsg', '✅ Login successful! Redirecting...', 'success');
+        setTimeout(() => window.location.href = 'index-particles.html', 800);
+      } else {
+        showMsg('loginMsg', d.error || 'Login failed', 'error');
+        btn.disabled = false; btn.textContent = 'Login';
+      }
+    } catch {
+      showMsg('loginMsg', 'Connection error! Is the backend running?', 'error');
+      btn.disabled = false; btn.textContent = 'Login';
+    }
+  }
+
+  // ---------- REGISTER ----------
+  async function handleRegister() {
+    const username = document.getElementById('rUser').value.trim();
+    const email    = document.getElementById('rEmail').value.trim();
+    const password = document.getElementById('rPass').value;
+    const confirm  = document.getElementById('rPass2').value;
+    const btn = document.getElementById('rBtn');
+
+    if (!username || !email || !password) return showMsg('regMsg','Fill all fields','error');
+    if (password !== confirm) return showMsg('regMsg','Passwords do not match!','error');
+    if (password.length < 4) return showMsg('regMsg','Password must be at least 4 characters','error');
+
+    btn.disabled = true; btn.textContent = 'Creating...';
+    try {
+      const r = await fetch(`${API}/auth/signup`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({username, email, password})
+      });
+      const d = await r.json();
+      if (r.ok) {
+        showMsg('regMsg', '✅ Account created! Redirecting to login...', 'success');
+        setTimeout(() => show('loginPanel'), 1800);
+      } else {
+        showMsg('regMsg', d.error || 'Registration failed', 'error');
+      }
+    } catch {
+      showMsg('regMsg', 'Connection error! Is the backend running?', 'error');
+    }
+    btn.disabled = false; btn.textContent = 'Create Account';
+  }
+
+  // ---------- FORGOT PASSWORD ----------
+  async function handleForgot() {
+    const username     = document.getElementById('fpUser').value.trim();
+    const email        = document.getElementById('fpEmail').value.trim();
+    const new_password = document.getElementById('fpNew').value;
+    const btn = document.getElementById('fpBtn');
+
+    if (!username || !email || !new_password) return showMsg('fpMsg','Fill all fields','error');
+    if (new_password.length < 4) return showMsg('fpMsg','Password must be at least 4 characters','error');
+
+    btn.disabled = true; btn.textContent = 'Resetting...';
+    try {
+      const r = await fetch(`${API}/auth/forgot-password`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({username, email, new_password})
+      });
+      const d = await r.json();
+      if (r.ok) {
+        showMsg('fpMsg', '✅ Password reset! Redirecting to login...', 'success');
+        setTimeout(() => show('loginPanel'), 1800);
+      } else {
+        showMsg('fpMsg', d.error || 'Reset failed', 'error');
+      }
+    } catch {
+      showMsg('fpMsg', 'Connection error! Is the backend running?', 'error');
+    }
+    btn.disabled = false; btn.textContent = 'Reset Password';
+  }
+
+  // Enter key support
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const active = document.querySelector('.panel.active')?.id;
+    if (active === 'loginPanel')    handleLogin();
+    if (active === 'registerPanel') handleRegister();
+    if (active === 'forgotPanel')   handleForgot();
+  });
+</script>
+</body>
+</html>

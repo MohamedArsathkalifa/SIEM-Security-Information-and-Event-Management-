@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🛡️ SIEM - Register</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *{
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    section{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      min-height: 100vh;
+      background-image: url('bg.jpg');
+      background-size: cover;
+      background-position: center;
+    }
+
+    .login-box{
+      position: relative;
+      width: 400px;
+      background: transparent;
+      border: 2px solid rgba(255, 255, 255, .5);
+      border-radius: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(15px);
+      padding: 40px 0;
+      margin: 20px;
+    }
+
+    h2{
+      font-size: 2em;
+      color: #fff;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .input-box{
+      position: relative;
+      width: 310px;
+      margin: 30px 0;
+      border-bottom: 2px solid #fff;
+    }
+
+    .input-box label{
+      position: absolute;
+      top: 50%;
+      left: 5px;
+      transform: translateY(-50%);
+      font-size: 1em;
+      color: #fff;
+      pointer-events: none;
+      transition: .5s;
+    }
+
+    .input-box input:focus~label,
+    .input-box input:valid~label{
+      top: -5px;
+    }
+
+    .input-box input{
+      width: 100%;
+      height: 50px;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-size: 1em;
+      color: #fff;
+      padding: 0 35px 0 5px;
+    }
+
+    .input-box .icon{
+      position: absolute;
+      right: 8px;
+      color: #fff;
+      font-size: 1.2em;
+      line-height: 57px;
+    }
+
+    button{
+      width: 310px;
+      height: 40px;
+      background: #fff;
+      border: none;
+      outline: none;
+      border-radius: 40px;
+      cursor: pointer;
+      font-size: 1em;
+      color: #000;
+      font-weight: 500;
+      transition: all 0.3s;
+      display: block;
+    }
+
+    button:hover{
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
+
+    button:disabled{
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .register-link{
+      font-size: .9em;
+      color: #fff;
+      text-align: center;
+      margin: 25px 0 10px;
+    }
+
+    .register-link p a{
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .register-link p a:hover{
+      text-decoration: underline;
+    }
+
+    .msg{
+      width: 310px;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      text-align: center;
+      display: none;
+    }
+
+    .error{
+      background: rgba(239, 68, 68, 0.9);
+      color: #fff;
+    }
+
+    .success{
+      background: rgba(16, 185, 129, 0.9);
+      color: #fff;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    @media (max-width:360px){
+      .login-box{
+        width: 100%;
+        border: none;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section>
+    <div class="login-box">
+      <form onsubmit="handleRegister(event)">
+        <h2>🛡️ Register</h2>
+        <div id="error" class="msg error"></div>
+        <div id="success" class="msg success"></div>
+
+        <div class="input-box">
+          <span class="icon"><ion-icon name="person"></ion-icon></span>
+          <input type="text" id="username" required>
+          <label>Username</label>
+        </div>
+
+        <div class="input-box">
+          <span class="icon"><ion-icon name="mail"></ion-icon></span>
+          <input type="email" id="email" required>
+          <label>Email</label>
+        </div>
+
+        <div class="input-box">
+          <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
+          <input type="password" id="password" required>
+          <label>Password</label>
+        </div>
+
+        <div class="input-box">
+          <span class="icon"><ion-icon name="shield-checkmark"></ion-icon></span>
+          <input type="password" id="confirm_password" required>
+          <label>Confirm Password</label>
+        </div>
+
+        <button type="submit" id="btn">Register</button>
+
+        <div class="register-link">
+          <p>Already have an account? <a href="login.html">Login</a></p>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+  <script>
+    const API = 'http://localhost:5000/api';
+
+    async function handleRegister(e) {
+      e.preventDefault();
+
+      const username = document.getElementById('username').value.trim();
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const confirm  = document.getElementById('confirm_password').value;
+      const err = document.getElementById('error');
+      const suc = document.getElementById('success');
+      const btn = document.getElementById('btn');
+
+      err.style.display = 'none';
+      suc.style.display = 'none';
+
+      // Client-side validation
+      if (password !== confirm) {
+        err.textContent = 'Passwords do not match!';
+        err.style.display = 'block';
+        return;
+      }
+
+      if (password.length < 4) {
+        err.textContent = 'Password must be at least 4 characters.';
+        err.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Registering...';
+
+      try {
+        const r = await fetch(`${API}/auth/signup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, email, password })
+        });
+
+        const d = await r.json();
+
+        if (r.ok) {
+          suc.textContent = '✅ Account created! Redirecting to login...';
+          suc.style.display = 'block';
+          setTimeout(() => {
+            window.location.href = 'login.html';
+          }, 1800);
+        } else {
+          err.textContent = d.error || 'Registration failed.';
+          err.style.display = 'block';
+          btn.disabled = false;
+          btn.textContent = 'Register';
+        }
+      } catch (error) {
+        err.textContent = 'Connection error! Make sure the backend is running.';
+        err.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Register';
+      }
+    }
+  </script>
+</body>
+</html>

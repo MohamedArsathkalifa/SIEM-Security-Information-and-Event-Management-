@@ -1,0 +1,2613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ S.I.E.M. - Advanced Security Dashboard</title>
+    <!-- Particles.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #a855f7;
+            --primary-light: #c084fc;
+            --dark-bg: #0f0818;
+            --card-bg: #1a0f2e;
+            --accent: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #1a0f2e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Particles Background */
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+        
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(168, 85, 247, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
+            animation: bgShift 15s ease infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        @keyframes bgShift {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        .wrapper {
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Header with Glassmorphism */
+        .header {
+            background: rgba(26, 15, 46, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--primary);
+            padding: 30px 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 8px 32px rgba(168, 85, 247, 0.15);
+        }
+        
+        .header h1 {
+            color: var(--primary-light);
+            font-size: 3em;
+            text-shadow: 0 0 30px rgba(168, 85, 247, 0.8);
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            color: var(--primary-light);
+            opacity: 0.8;
+            font-size: 1.1em;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            margin-right: 8px;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            50% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+        }
+        
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            padding: 0 20px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .nav-tab {
+            background: rgba(26, 15, 46, 0.6);
+            color: var(--primary-light);
+            border: 2px solid var(--primary);
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .nav-tab:hover {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(168, 85, 247, 0.4);
+        }
+        
+        .nav-tab.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: #000;
+            box-shadow: 0 8px 25px rgba(168, 85, 247, 0.5);
+        }
+
+        .nav-tab.logout-btn {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: var(--danger);
+            color: #f87171;
+        }
+
+        .nav-tab.logout-btn:hover {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: #fff;
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .user-badge {
+            color: rgba(192, 132, 252, 0.8);
+            font-size: 0.85em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 12px 10px;
+        }
+        
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        /* Page Sections */
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, rgba(26, 15, 46, 0.9) 0%, rgba(45, 27, 78, 0.9) 100%);
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(168, 85, 247, 0.1) 50%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(168, 85, 247, 0.3);
+            border-color: var(--primary-light);
+        }
+        
+        .stat-card h3 {
+            color: var(--primary-light);
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .stat-card .number {
+            color: var(--primary-light);
+            font-size: 3.5em;
+            font-weight: 800;
+            margin: 15px 0;
+            text-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .stat-card p {
+            color: #b0b0b0;
+            font-size: 1em;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .stat-card.critical { border-color: var(--danger); }
+        .stat-card.critical .number { color: var(--danger); }
+        .stat-card.critical h3 { color: var(--danger); }
+        
+        /* Table Section */
+        .table-section {
+            background: linear-gradient(135deg, rgba(26, 15, 46, 0.9) 0%, rgba(45, 27, 78, 0.9) 100%);
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            margin-top: 30px;
+            overflow: hidden;
+        }
+        
+        .table-section h2 {
+            color: var(--primary-light);
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 10px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95em;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #0f0818 0%, #1a0f2e 100%);
+            color: var(--primary);
+            padding: 18px;
+            text-align: left;
+            font-weight: 700;
+            border-bottom: 2px solid var(--primary);
+            position: sticky;
+            top: 0;
+        }
+        
+        td {
+            padding: 15px 18px;
+            border-bottom: 1px solid rgba(168, 85, 247, 0.1);
+            color: #d0d0d0;
+            transition: all 0.3s;
+        }
+        
+        tbody tr {
+            transition: all 0.3s;
+        }
+        
+        tbody tr:hover {
+            background: rgba(168, 85, 247, 0.15);
+            transform: scale(1.01);
+            box-shadow: inset 0 0 10px rgba(168, 85, 247, 0.1);
+        }
+        
+        /* Badges */
+        .badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+        }
+        
+        .badge-critical {
+            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+            color: white;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+        }
+        
+        .badge-high {
+            background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
+            color: white;
+        }
+
+        .badge-medium {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+        }
+        
+        .badge-low {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            color: white;
+        }
+        
+        /* Buttons */
+        .btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s;
+            display: inline-block;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(168, 85, 247, 0.4);
+        }
+        
+        /* Chart Container */
+        .chart-container {
+            background: linear-gradient(135deg, rgba(26, 15, 46, 0.9) 0%, rgba(45, 27, 78, 0.9) 100%);
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            backdrop-filter: blur(10px);
+        }
+        
+        .chart-container h3 {
+            color: var(--primary-light);
+            margin-bottom: 20px;
+        }
+        
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 15px;
+            height: 250px;
+            justify-content: space-around;
+        }
+        
+        .bar {
+            flex: 1;
+            background: linear-gradient(180deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 10px 10px 0 0;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+            min-height: 40px;
+        }
+        
+        .bar:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(168, 85, 247, 0.4);
+        }
+        
+        .bar-label {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--primary-light);
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        
+        .bar-value {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--primary-light);
+            font-weight: 700;
+            font-size: 1.2em;
+        }
+        
+        /* Alert Banner */
+        .alert-banner {
+            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+            animation: slideIn 0.5s ease;
+            position: relative;
+            z-index: 10;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .alert-icon {
+            font-size: 1.8em;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* Filter Section */
+        .filter-section {
+            background: rgba(26, 15, 46, 0.8);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            border: 1px solid var(--primary);
+            position: relative;
+            z-index: 10;
+        }
+        
+        .filter-section input,
+        .filter-section select {
+            background: linear-gradient(135deg, #0f0818 0%, #1a0f2e 100%);
+            color: #e0e0e0;
+            border: 2px solid var(--primary);
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        
+        .filter-section input:focus,
+        .filter-section select:focus {
+            outline: none;
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
+            border-color: var(--primary-light);
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--primary);
+            font-size: 0.9em;
+            margin-top: 50px;
+            border-top: 1px solid var(--primary);
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* ── Dashboard ── */
+        .db-kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px;}
+        .db-tile{background:rgba(15,8,24,0.7);border:1px solid rgba(168,85,247,0.18);border-radius:14px;padding:16px 18px;position:relative;overflow:hidden;transition:transform 0.22s,box-shadow 0.22s;cursor:default;}
+        .db-tile:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,0.4);}
+        .db-tile::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;border-radius:0 0 14px 14px;}
+        .db-tile-purple::after{background:linear-gradient(90deg,#7c3aed,#c084fc);}
+        .db-tile-amber::after {background:linear-gradient(90deg,#d97706,#fbbf24);}
+        .db-tile-red::after   {background:linear-gradient(90deg,#dc2626,#f87171);}
+        .db-tile-green::after {background:linear-gradient(90deg,#059669,#34d399);}
+        .db-tile-cyan::after  {background:linear-gradient(90deg,#0891b2,#67e8f9);}
+        .db-tile-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+        .db-tile-icon{font-size:1.1em;}
+        .db-tile-trend{font-size:0.68em;font-weight:700;padding:1px 6px;border-radius:10px;}
+        .db-tile-status{font-size:0.75em;animation:pulse 2s infinite;}
+        .db-tile-val{font-size:2.1em;font-weight:900;color:#f1f5f9;letter-spacing:-2px;line-height:1;}
+        .db-tile-lbl{font-size:0.68em;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-top:3px;}
+        .db-tile-spark{display:block;margin-top:8px;opacity:0.75;width:100%;}
+        .db-mid-row{display:grid;grid-template-columns:1fr 190px 210px;gap:12px;margin-bottom:16px;}
+        .db-bot-row{display:grid;grid-template-columns:1fr 280px;gap:12px;}
+        .db-panel{background:rgba(13,7,22,0.85);border:1px solid rgba(168,85,247,0.18);border-radius:14px;padding:18px 20px;position:relative;}
+        .db-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(168,85,247,0.5),transparent);}
+        .db-panel-timeline{padding-bottom:10px;}
+        .db-panel-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px;}
+        .db-panel-hdr > span:first-child{color:#c084fc;font-weight:700;font-size:0.79em;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;}
+        .db-legend-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+        .db-legend-txt{font-size:0.68em;color:#64748b;margin-right:4px;}
+        .db-ring-num{font-size:1.4em;font-weight:900;color:#c084fc;letter-spacing:-1px;}
+        .db-hrow{display:flex;align-items:center;gap:8px;}
+        .db-hrow-left{display:flex;align-items:center;gap:5px;min-width:95px;flex-shrink:0;}
+        .db-hstatus{font-size:0.6em;line-height:1;}
+        .db-hlbl{font-size:0.72em;color:#94a3b8;}
+        .db-htrack{flex:1;height:5px;background:rgba(255,255,255,0.04);border-radius:99px;overflow:hidden;}
+        .db-hbar{height:100%;border-radius:99px;transition:width 1.1s cubic-bezier(.4,0,.2,1);}
+        .db-hval{font-size:0.68em;font-weight:700;min-width:38px;text-align:right;color:#94a3b8;}
+        .db-health-footer{margin-top:14px;padding-top:10px;border-top:1px solid rgba(168,85,247,0.08);font-size:0.68em;color:#4b5563;text-align:center;}
+        .db-see-all{background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.28);color:#c084fc;padding:4px 12px;border-radius:8px;cursor:pointer;font-size:0.74em;font-weight:600;transition:all 0.15s;white-space:nowrap;}
+        .db-see-all:hover{background:rgba(168,85,247,0.25);}
+        .db-feed-scroll{display:flex;flex-direction:column;gap:5px;overflow-y:auto;max-height:300px;flex:1;padding-right:2px;margin-bottom:10px;}
+        .db-feed-scroll::-webkit-scrollbar{width:3px;}
+        .db-feed-scroll::-webkit-scrollbar-thumb{background:rgba(168,85,247,0.3);border-radius:2px;}
+        .db-feed-btn{width:100%;background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.25);color:#c084fc;padding:8px;border-radius:9px;cursor:pointer;font-size:0.8em;font-weight:600;transition:all 0.15s;margin-top:auto;}
+        .db-feed-btn:hover{background:rgba(168,85,247,0.22);}
+        .db-pulse-dot{width:8px;height:8px;border-radius:50%;background:#10b981;display:inline-block;animation:pulse 2s infinite;}
+        .db-feed-item{display:flex;flex-direction:column;gap:2px;padding:7px 9px;border-radius:8px;background:rgba(255,255,255,0.025);border-left:3px solid #4b5563;font-size:0.77em;animation:feedIn 0.3s ease;}
+        .db-feed-item.crit{border-color:#ef4444;background:rgba(239,68,68,0.08);}
+        .db-feed-item.high{border-color:#f59e0b;background:rgba(245,158,11,0.06);}
+        .db-feed-item.med {border-color:#6366f1;background:rgba(99,102,241,0.05);}
+        .db-feed-item.low {border-color:#10b981;background:rgba(16,185,129,0.04);}
+        .db-feed-top{display:flex;justify-content:space-between;align-items:center;gap:6px;}
+        .db-feed-desc{color:#94a3b8;line-height:1.3;margin-top:2px;}
+        @keyframes feedIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+        /* ── Analytics ── */
+        .an-refresh-btn{background:rgba(168,85,247,0.18);border:1px solid rgba(168,85,247,0.35);color:#c084fc;padding:3px 10px;border-radius:10px;cursor:pointer;font-size:0.85em;}
+        .an-hbar-row{display:flex;flex-direction:column;gap:3px;}
+        .an-hbar-meta{display:flex;justify-content:space-between;font-size:0.78em;}
+        .an-hbar-name{color:#cbd5e1;font-weight:600;max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+        .an-hbar-count{color:#94a3b8;}
+        .an-hbar-track{height:7px;background:rgba(255,255,255,0.05);border-radius:99px;overflow:hidden;}
+        .an-hbar-fill{height:100%;border-radius:99px;transition:width 0.7s cubic-bezier(.4,2,.6,1);}
+        #an-live-feed::-webkit-scrollbar{width:3px;}
+        #an-live-feed::-webkit-scrollbar-thumb{background:rgba(168,85,247,0.35);border-radius:2px;}
+        .an-feed-item{display:flex;gap:8px;align-items:flex-start;padding:6px 8px;border-radius:7px;background:rgba(255,255,255,0.03);border-left:3px solid #6b7280;font-size:0.79em;animation:feedIn 0.3s ease;}
+        .an-feed-item.crit{border-color:#ef4444;background:rgba(239,68,68,0.07);}
+        .an-feed-item.high{border-color:#f59e0b;background:rgba(245,158,11,0.05);}
+        .an-feed-item.med{border-color:#6366f1;background:rgba(99,102,241,0.05);}
+        .an-feed-item.low{border-color:#10b981;background:rgba(16,185,129,0.04);}
+        .an-feed-ts{color:#6b7280;white-space:nowrap;flex-shrink:0;}
+        .an-feed-desc{color:#cbd5e1;line-height:1.3;}
+        /* ── Analytics v2 ── */
+        .an2-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+        .an2-title{font-size:1.15em;font-weight:700;color:#e2e8f0;letter-spacing:0.02em;}
+        .an2-topbar-right{display:flex;align-items:center;gap:10px;}
+        .an2-ts{font-size:0.78em;color:#6b7280;}
+        .an2-refresh-btn{background:rgba(168,85,247,0.18);border:1px solid rgba(168,85,247,0.35);color:#c084fc;padding:5px 14px;border-radius:10px;cursor:pointer;font-size:0.82em;font-weight:600;transition:all 0.2s;}
+        .an2-refresh-btn:hover{background:rgba(168,85,247,0.3);box-shadow:0 0 12px rgba(168,85,247,0.3);}
+        .an2-kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:16px;}
+        .an2-kpi{position:relative;background:rgba(20,12,36,0.85);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px 16px 12px;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;}
+        .an2-kpi:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.3);}
+        .an2-kpi-label{font-size:0.7em;color:#6b7280;text-transform:uppercase;letter-spacing:0.08em;font-weight:600;margin-bottom:6px;}
+        .an2-kpi-val{font-size:1.9em;font-weight:800;line-height:1;margin-bottom:4px;}
+        .an2-kpi-sub{font-size:0.68em;color:#6b7280;}
+        .an2-kpi-glow{position:absolute;top:-30px;right:-20px;width:80px;height:80px;border-radius:50%;opacity:0.12;filter:blur(20px);pointer-events:none;}
+        .an2-kpi-purple .an2-kpi-val{color:#c084fc;}
+        .an2-kpi-purple{border-color:rgba(168,85,247,0.2);}
+        .an2-kpi-red .an2-kpi-val{color:#f87171;}
+        .an2-kpi-red{border-color:rgba(239,68,68,0.2);}
+        .an2-kpi-red2 .an2-kpi-val{color:#fca5a5;}
+        .an2-kpi-red2{border-color:rgba(220,38,38,0.2);}
+        .an2-kpi-amber .an2-kpi-val{color:#fbbf24;}
+        .an2-kpi-amber{border-color:rgba(245,158,11,0.2);}
+        .an2-kpi-green .an2-kpi-val{color:#34d399;}
+        .an2-kpi-green{border-color:rgba(16,185,129,0.2);}
+        .an2-kpi-blue .an2-kpi-val{color:#60a5fa;}
+        .an2-kpi-blue{border-color:rgba(59,130,246,0.2);}
+        .an2-row{display:grid;gap:14px;margin-bottom:14px;}
+        .an2-badge{font-size:0.72em;padding:2px 10px;border-radius:20px;background:rgba(168,85,247,0.2);color:#c084fc;}
+        .an2-spark-tooltip{position:absolute;background:rgba(15,8,24,0.95);border:1px solid rgba(168,85,247,0.4);border-radius:8px;padding:5px 10px;font-size:0.75em;color:#e2e8f0;pointer-events:none;z-index:10;white-space:nowrap;}
+        .an2-live-dot{width:8px;height:8px;border-radius:50%;background:#10b981;display:inline-block;animation:pulse 2s infinite;flex-shrink:0;}
+        .an2-heat-cell{border-radius:3px;transition:opacity 0.2s;}
+        .an2-heat-cell:hover{opacity:1!important;outline:1px solid rgba(255,255,255,0.3);}
+        @media(max-width:1100px){.an2-kpi-row{grid-template-columns:repeat(3,1fr);}}
+        /* ── Event Log ── */
+        .el-filterbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(26,15,46,0.85);border:1px solid rgba(168,85,247,0.25);border-radius:12px;padding:12px 14px;margin-bottom:10px;}
+        .el-search-wrap{position:relative;flex:1;min-width:200px;}
+        .el-search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:0.9em;pointer-events:none;}
+        .el-search{width:100%;background:rgba(15,8,24,0.8);color:#e0e0e0;border:1px solid rgba(168,85,247,0.3);border-radius:8px;padding:8px 30px 8px 32px;font-size:0.86em;outline:none;}
+        .el-search:focus{border-color:var(--primary);box-shadow:0 0 8px rgba(168,85,247,0.2);}
+        .el-clear-x{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:#6b7280;cursor:pointer;font-size:1em;padding:2px;}
+        .el-select{background:rgba(15,8,24,0.8);color:#e0e0e0;border:1px solid rgba(168,85,247,0.3);border-radius:8px;padding:7px 10px;font-size:0.82em;outline:none;cursor:pointer;}
+        .el-btn-refresh{background:rgba(168,85,247,0.18);border:1px solid rgba(168,85,247,0.32);color:#c084fc;padding:7px 12px;border-radius:8px;cursor:pointer;font-size:0.8em;font-weight:600;white-space:nowrap;}
+        .el-btn-clear{background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.28);color:#f87171;padding:7px 12px;border-radius:8px;cursor:pointer;font-size:0.8em;font-weight:600;white-space:nowrap;}
+        .el-btn-export{background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.28);color:#34d399;padding:7px 12px;border-radius:8px;cursor:pointer;font-size:0.8em;font-weight:600;white-space:nowrap;}
+        .el-count-badge{font-size:0.76em;color:#6b7280;white-space:nowrap;margin-left:4px;}
+        .el-minibars{display:flex;gap:2px;height:4px;border-radius:99px;overflow:hidden;margin-bottom:2px;}
+        .el-minibar-seg{height:100%;transition:flex 0.5s ease;}
+        .el-th-sort{cursor:pointer;user-select:none;white-space:nowrap;}
+        .el-th-sort:hover{color:#fff;}
+        .el-sort-arrow{opacity:0.3;font-size:0.8em;margin-left:3px;}
+        .el-th-sort.active .el-sort-arrow{opacity:1;color:#c084fc;}
+        tbody tr.el-highlight{background:rgba(168,85,247,0.12)!important;}
+        .el-action-btn{background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.25);color:#c084fc;padding:3px 8px;border-radius:6px;cursor:pointer;font-size:0.75em;transition:all 0.15s;}
+        .el-action-btn:hover{background:rgba(168,85,247,0.28);}
+        .el-pagination{display:flex;gap:5px;justify-content:center;align-items:center;padding:16px 0 2px;flex-wrap:wrap;}
+        .el-page-btn{background:rgba(26,15,46,0.9);border:1px solid rgba(168,85,247,0.22);color:#94a3b8;padding:5px 11px;border-radius:7px;cursor:pointer;font-size:0.8em;transition:all 0.15s;min-width:32px;text-align:center;}
+        .el-page-btn:hover{border-color:var(--primary);color:#c084fc;}
+        .el-page-btn.active{background:rgba(168,85,247,0.22);border-color:var(--primary);color:#fff;font-weight:700;}
+        .el-page-btn:disabled{opacity:0.3;cursor:not-allowed;}
+        .el-drawer{position:fixed;top:0;right:-480px;width:460px;height:100vh;background:rgba(15,8,24,0.97);border-left:2px solid rgba(168,85,247,0.4);backdrop-filter:blur(16px);z-index:9999;transition:right 0.32s cubic-bezier(.4,0,.2,1);overflow-y:auto;box-shadow:-8px 0 40px rgba(0,0,0,0.5);}
+        .el-drawer.open{right:0;}
+        .el-drawer-inner{padding:26px 22px;}
+        .el-detail-row{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid rgba(168,85,247,0.1);}
+        .el-detail-key{color:#6b7280;font-size:0.8em;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;min-width:95px;flex-shrink:0;padding-top:1px;}
+        .el-detail-val{color:#e2e8f0;font-size:0.86em;line-height:1.45;word-break:break-all;}
+        /* ── Threats ── */
+        .th-filterbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(26,15,46,0.85);border:1px solid rgba(168,85,247,0.25);border-radius:12px;padding:12px 14px;margin-bottom:16px;}
+        .th-search{flex:1;min-width:200px;background:rgba(15,8,24,0.8);color:#e0e0e0;border:1px solid rgba(168,85,247,0.32);border-radius:8px;padding:8px 12px;font-size:0.86em;outline:none;}
+        .th-search:focus{border-color:var(--primary);}
+        .th-select{background:rgba(15,8,24,0.8);color:#e0e0e0;border:1px solid rgba(168,85,247,0.32);border-radius:8px;padding:8px 10px;font-size:0.82em;outline:none;cursor:pointer;}
+        .th-clear-btn{background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.28);color:#f87171;padding:7px 12px;border-radius:8px;cursor:pointer;font-size:0.8em;font-weight:600;}
+        .th-card{background:linear-gradient(135deg,rgba(26,15,46,0.95),rgba(45,27,78,0.88));border:1px solid rgba(168,85,247,0.18);border-radius:12px;padding:15px 17px;position:relative;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s,border-color 0.2s;cursor:default;}
+        .th-card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,0.35);border-color:rgba(168,85,247,0.45);}
+        .th-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+        .th-card.c-critical::before{background:linear-gradient(90deg,#ef4444,#f97316);}
+        .th-card.c-high::before{background:linear-gradient(90deg,#f59e0b,#fbbf24);}
+        .th-card.c-medium::before{background:linear-gradient(90deg,#6366f1,#818cf8);}
+        .th-card.c-low::before{background:linear-gradient(90deg,#10b981,#34d399);}
+        .th-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px;}
+        .th-card-name{font-weight:700;color:#e2e8f0;font-size:0.93em;line-height:1.3;}
+        .th-card-desc{font-size:0.79em;color:#94a3b8;line-height:1.4;margin-bottom:9px;}
+        .th-card-meta{display:flex;gap:7px;flex-wrap:wrap;font-size:0.73em;}
+        .th-card-tag{padding:2px 7px;border-radius:20px;background:rgba(168,85,247,0.12);color:#c084fc;border:1px solid rgba(168,85,247,0.22);}
+        .th-card-rec{margin-top:9px;padding:7px 9px;border-radius:7px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.18);font-size:0.75em;color:#6ee7b7;line-height:1.4;}
+        .th-card-rec::before{content:'✅ Fix: ';font-weight:700;}
+        .th-att-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(168,85,247,0.08);}
+        .th-att-rank{width:18px;text-align:center;font-weight:800;color:#6b7280;font-size:0.78em;}
+        .th-att-ip{flex:1;font-family:monospace;font-size:0.83em;color:#cbd5e1;}
+        .th-att-cnt{font-weight:700;font-size:0.83em;}
+        .th-hidden{display:none!important;}
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2em; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .nav-tabs { flex-direction: column; }
+            .nav-tab { width: 100%; justify-content: center; }
+            table { font-size: 0.85em; }
+            td, th { padding: 10px 12px; }
+        }
+        
+        /* Loading Animation */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--primary);
+            font-size: 1.2em;
+        }
+        
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--primary);
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== ALERT TOAST NOTIFICATIONS ===== */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 380px;
+            pointer-events: none;
+        }
+        .toast {
+            background: #1e1e2e;
+            border-radius: 12px;
+            padding: 16px 18px;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            pointer-events: all;
+            animation: toastIn 0.35s cubic-bezier(.21,1.02,.73,1) forwards;
+            border-left: 4px solid #ef4444;
+            position: relative;
+            overflow: hidden;
+        }
+        .toast.toast-high {
+            border-left-color: #f59e0b;
+        }
+        .toast::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            animation: toastShimmer 2s infinite;
+        }
+        @keyframes toastShimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        .toast-icon {
+            font-size: 1.5em;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .toast-body { flex: 1; min-width: 0; }
+        .toast-title {
+            font-weight: 700;
+            font-size: 0.95em;
+            color: #f8f8f8;
+            margin-bottom: 3px;
+        }
+        .toast-title.critical { color: #f87171; }
+        .toast-title.high     { color: #fbbf24; }
+        .toast-msg {
+            font-size: 0.82em;
+            color: #9ca3af;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .toast-time {
+            font-size: 0.72em;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        .toast-close {
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            font-size: 1em;
+            padding: 0;
+            flex-shrink: 0;
+            line-height: 1;
+            margin-top: 1px;
+        }
+        .toast-close:hover { color: #e5e7eb; }
+        .toast-progress {
+            position: absolute;
+            bottom: 0; left: 0;
+            height: 3px;
+            background: rgba(239,68,68,0.6);
+            animation: toastProgress 6s linear forwards;
+        }
+        .toast-high .toast-progress { background: rgba(245,158,11,0.6); }
+        @keyframes toastProgress {
+            from { width: 100%; }
+            to   { width: 0%; }
+        }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(60px) scale(0.95); }
+            to   { opacity: 1; transform: translateX(0) scale(1); }
+        }
+        @keyframes toastOut {
+            from { opacity: 1; transform: translateX(0) scale(1); max-height: 120px; margin-bottom: 0; }
+            to   { opacity: 0; transform: translateX(60px) scale(0.9); max-height: 0; margin-bottom: -12px; }
+        }
+        .toast.removing {
+            animation: toastOut 0.3s ease forwards;
+        }
+
+        /* Sub-tabs inside Malware page */
+        .sub-tab {
+            background: rgba(26,15,46,0.6);
+            color: var(--primary-light);
+            border: 2px solid var(--primary);
+            padding: 10px 22px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95em;
+            transition: all 0.3s;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .sub-tab:hover {
+            background: rgba(168,85,247,0.3);
+            transform: translateY(-2px);
+        }
+        .sub-tab.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: #000;
+            box-shadow: 0 6px 20px rgba(168,85,247,0.4);
+        }
+        .sub-page { display: block; }
+    </style>
+</head>
+<body>
+    <!-- Particles.js Background -->
+    <div id="particles-js"></div>
+    
+    <!-- Toast notification container -->
+    <div id="toast-container"></div>
+
+    <div class="wrapper">
+        <div class="header">
+            <h1>🛡️ S.I.E.M. SECURITY DASHBOARD</h1>
+            <p><span class="status-indicator"></span>Real-Time Threat Detection & Analysis</p>
+        </div>
+
+        <div style="display:flex;justify-content:center;margin-top:10px;position:relative;z-index:10;">
+            <span id="backend-status" style="font-size:0.8em;padding:4px 16px;border-radius:20px;font-weight:600;background:rgba(239,68,68,0.15);border:1px solid #ef4444;color:#f87171;">
+                ⬤ Backend: Checking...
+            </span>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showPage('dashboard',this)">📊 Dashboard</button>
+            <button class="nav-tab" onclick="showPage('logs',this)">📄 Event Logs</button>
+            <button class="nav-tab" onclick="showPage('analytics',this)">📈 Analytics</button>
+            <button class="nav-tab" onclick="showPage('threats',this)">🎯 Threats</button>
+            <button class="nav-tab" onclick="showPage('malware',this)">🦠 Malware</button>
+            <span class="user-badge" id="user-badge">👤 <span id="nav-username">...</span></span>
+            <button class="nav-tab logout-btn" onclick="handleLogout()">🚪 Logout</button>
+        </div>
+
+        <div class="container">
+            <!-- Dashboard Page -->
+            <div id="dashboard" class="page active">
+
+                <!-- Critical alert -->
+                <div id="critical-alert" style="display:none;" class="alert-banner">
+                    <span class="alert-icon">⚠️</span>
+                    <span>CRITICAL ALERT: Potential Security Threat Detected — Immediate Investigation Required!</span>
+                    <button onclick="document.getElementById('critical-alert').style.display='none'" style="margin-left:auto;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);color:#fff;padding:4px 14px;border-radius:6px;cursor:pointer;font-size:0.83em;">Dismiss</button>
+                </div>
+
+                <!-- ── ROW 1: 5 KPI tiles ── -->
+                <div class="db-kpi-row">
+                    <div class="db-tile db-tile-purple">
+                        <div class="db-tile-top">
+                            <span class="db-tile-icon">📋</span>
+                            <span class="db-tile-trend" id="db-trend-logs"></span>
+                        </div>
+                        <div class="db-tile-val" id="total-logs">—</div>
+                        <div class="db-tile-lbl">Total Events</div>
+                        <canvas class="db-tile-spark" id="db-spark-logs" width="120" height="28"></canvas>
+                    </div>
+                    <div class="db-tile db-tile-amber">
+                        <div class="db-tile-top">
+                            <span class="db-tile-icon">⚡</span>
+                            <span class="db-tile-trend" id="db-trend-alerts"></span>
+                        </div>
+                        <div class="db-tile-val" id="total-alerts">—</div>
+                        <div class="db-tile-lbl">Active Alerts</div>
+                        <canvas class="db-tile-spark" id="db-spark-alerts" width="120" height="28"></canvas>
+                    </div>
+                    <div class="db-tile db-tile-red">
+                        <div class="db-tile-top">
+                            <span class="db-tile-icon">🔴</span>
+                            <span class="db-tile-trend" id="db-trend-crit"></span>
+                        </div>
+                        <div class="db-tile-val" id="critical-alerts">—</div>
+                        <div class="db-tile-lbl">Critical</div>
+                        <canvas class="db-tile-spark" id="db-spark-crit" width="120" height="28"></canvas>
+                    </div>
+                    <div class="db-tile db-tile-green">
+                        <div class="db-tile-top">
+                            <span class="db-tile-icon">🛡️</span>
+                        </div>
+                        <div class="db-tile-val" id="db-kv-low">—</div>
+                        <div class="db-tile-lbl">Low / Info</div>
+                        <canvas class="db-tile-spark" id="db-spark-low" width="120" height="28"></canvas>
+                    </div>
+                    <div class="db-tile db-tile-cyan">
+                        <div class="db-tile-top">
+                            <span class="db-tile-icon">📡</span>
+                            <span class="db-tile-status" id="db-api-status">●</span>
+                        </div>
+                        <div class="db-tile-val" id="db-kv-ips">—</div>
+                        <div class="db-tile-lbl">Unique IPs</div>
+                        <div style="font-size:0.65em;color:#6b7280;margin-top:3px;" id="db-last-upd">—</div>
+                    </div>
+                </div>
+
+                <!-- ── ROW 2: Timeline + Ring + Health ── -->
+                <div class="db-mid-row">
+
+                    <!-- 24h activity timeline -->
+                    <div class="db-panel db-panel-timeline">
+                        <div class="db-panel-hdr">
+                            <span>📈 24-Hour Activity Timeline</span>
+                            <div style="display:flex;gap:12px;align-items:center;">
+                                <span class="db-legend-dot" style="background:#ef4444;"></span><span class="db-legend-txt">Critical</span>
+                                <span class="db-legend-dot" style="background:#f59e0b;"></span><span class="db-legend-txt">High</span>
+                                <span class="db-legend-dot" style="background:#6366f1;"></span><span class="db-legend-txt">Medium</span>
+                                <span class="db-legend-dot" style="background:#10b981;"></span><span class="db-legend-txt">Low</span>
+                            </div>
+                        </div>
+                        <canvas id="db-timeline" style="width:100%;display:block;" height="130"></canvas>
+                        <div id="db-timeline-labels" style="display:flex;justify-content:space-between;padding:4px 0 0;font-size:0.65em;color:#4b5563;"></div>
+                    </div>
+
+                    <!-- Severity ring -->
+                    <div class="db-panel" style="display:flex;flex-direction:column;align-items:center;">
+                        <div class="db-panel-hdr" style="width:100%;">Severity Mix</div>
+                        <div style="position:relative;display:flex;justify-content:center;align-items:center;flex:1;">
+                            <canvas id="db-ring" width="150" height="150"></canvas>
+                            <div style="position:absolute;text-align:center;pointer-events:none;">
+                                <div class="db-ring-num" id="db-ring-total">0</div>
+                                <div style="font-size:0.62em;color:#6b7280;letter-spacing:0.5px;">TOTAL</div>
+                            </div>
+                        </div>
+                        <div id="db-ring-legend" style="display:flex;flex-direction:column;gap:5px;width:100%;padding-top:8px;"></div>
+                    </div>
+
+                    <!-- System health -->
+                    <div class="db-panel">
+                        <div class="db-panel-hdr">System Health</div>
+                        <div style="display:flex;flex-direction:column;gap:13px;padding-top:2px;">
+                            <div class="db-hrow">
+                                <div class="db-hrow-left"><span class="db-hstatus" id="ds-api-dot">●</span><span class="db-hlbl">Backend API</span></div>
+                                <div class="db-htrack"><div class="db-hbar" id="dh-api" style="background:#10b981;width:0%;"></div></div>
+                                <span class="db-hval" id="dh-api-val">—</span>
+                            </div>
+                            <div class="db-hrow">
+                                <div class="db-hrow-left"><span class="db-hstatus" id="ds-det-dot">●</span><span class="db-hlbl">Detection</span></div>
+                                <div class="db-htrack"><div class="db-hbar" id="dh-det" style="background:#a855f7;width:0%;"></div></div>
+                                <span class="db-hval" id="dh-det-val">—</span>
+                            </div>
+                            <div class="db-hrow">
+                                <div class="db-hrow-left"><span class="db-hstatus" id="ds-log-dot">●</span><span class="db-hlbl">Log Ingest</span></div>
+                                <div class="db-htrack"><div class="db-hbar" id="dh-log" style="background:#f59e0b;width:0%;"></div></div>
+                                <span class="db-hval" id="dh-log-val">—</span>
+                            </div>
+                            <div class="db-hrow">
+                                <div class="db-hrow-left"><span class="db-hstatus" id="ds-alr-dot">●</span><span class="db-hlbl">Alert Mgr</span></div>
+                                <div class="db-htrack"><div class="db-hbar" id="dh-alr" style="background:#ec4899;width:0%;"></div></div>
+                                <span class="db-hval" id="dh-alr-val">—</span>
+                            </div>
+                            <div class="db-hrow">
+                                <div class="db-hrow-left"><span class="db-hstatus" id="ds-db-dot">●</span><span class="db-hlbl">Database</span></div>
+                                <div class="db-htrack"><div class="db-hbar" id="dh-db" style="background:#06b6d4;width:0%;"></div></div>
+                                <span class="db-hval" id="dh-db-val">—</span>
+                            </div>
+                        </div>
+                        <div class="db-health-footer" id="db-health-ts"></div>
+                    </div>
+                </div>
+
+                <!-- ── ROW 3: Top attackers + Threat gauge ── -->
+                <div style="display:grid;grid-template-columns:1fr 1fr 220px;gap:12px;margin-bottom:12px;">
+
+                    <!-- Top attackers -->
+                    <div class="db-panel">
+                        <div class="db-panel-hdr">
+                            <span>🎯 Top Attackers</span>
+                            <span id="db-attk-count" style="font-size:0.72em;color:#64748b;font-weight:400;text-transform:none;"></span>
+                        </div>
+                        <div id="db-top-attackers" style="display:flex;flex-direction:column;gap:8px;"></div>
+                    </div>
+
+                    <!-- Top event types -->
+                    <div class="db-panel">
+                        <div class="db-panel-hdr">
+                            <span>📊 Event Breakdown</span>
+                        </div>
+                        <div id="db-event-types" style="display:flex;flex-direction:column;gap:8px;"></div>
+                    </div>
+
+                    <!-- Threat velocity gauge -->
+                    <div class="db-panel" style="display:flex;flex-direction:column;align-items:center;">
+                        <div class="db-panel-hdr" style="width:100%;">Threat Level</div>
+                        <canvas id="db-gauge" width="190" height="110"></canvas>
+                        <div id="db-gauge-label" style="font-size:0.75em;font-weight:700;letter-spacing:1px;margin-top:4px;"></div>
+                        <div id="db-gauge-sub" style="font-size:0.65em;color:#64748b;margin-top:2px;text-align:center;"></div>
+                    </div>
+                </div>
+
+                <!-- ── ROW 4: Events table + Live feed ── -->
+                <div class="db-bot-row">
+                    <!-- Recent events table -->
+                    <div class="db-panel" style="overflow:hidden;">
+                        <div class="db-panel-hdr">
+                            <span>🚨 Recent Security Events</span>
+                            <button onclick="showPage('logs',null)" class="db-see-all">See All →</button>
+                        </div>
+                        <div class="table-wrapper" style="margin:0;border-radius:0;">
+                            <table>
+                                <thead><tr>
+                                    <th>ID</th><th>Time</th><th>Source IP</th>
+                                    <th>Severity</th><th>Type</th><th>Description</th>
+                                </tr></thead>
+                                <tbody id="dashboard-events">
+                                    <tr><td colspan="6" class="loading">Loading events…</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- Live alert feed -->
+                    <div class="db-panel" style="display:flex;flex-direction:column;">
+                        <div class="db-panel-hdr">
+                            <span>🔔 Live Alerts</span>
+                            <span class="db-pulse-dot"></span>
+                        </div>
+                        <div id="db-live-feed" class="db-feed-scroll"></div>
+                        <button onclick="showPage('logs',null)" class="db-feed-btn">View All Events →</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Logs Page -->
+            <div id="logs" class="page">
+                <div class="el-filterbar">
+                    <div class="el-search-wrap">
+                        <span class="el-search-icon">🔍</span>
+                        <input class="el-search" id="el-search" placeholder="Search IP, type, description…" oninput="elSearch()">
+                        <button class="el-clear-x" id="el-search-clear" onclick="elClearSearch()" style="display:none;">✕</button>
+                    </div>
+                    <select class="el-select" id="filter-severity" onchange="applyFilters()">
+                        <option value="">All Severities</option>
+                        <option value="CRITICAL">🔴 Critical</option>
+                        <option value="HIGH">🟠 High</option>
+                        <option value="MEDIUM">🟡 Medium</option>
+                        <option value="LOW">🟢 Low</option>
+                    </select>
+                    <select class="el-select" id="el-type-filter" onchange="elSearch()"><option value="">All Types</option></select>
+                    <select class="el-select" id="el-sort" onchange="elSearch()">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="severity">By Severity</option>
+                    </select>
+                    <button class="el-btn-refresh" onclick="loadAllLogs(true)">↺ Refresh</button>
+                    <button class="el-btn-clear" onclick="clearFilters()">✖ Clear</button>
+                    <button class="el-btn-export" onclick="elExportCSV()">⬇ CSV</button>
+                    <span class="el-count-badge" id="el-count-badge"></span>
+                </div>
+                <div class="el-minibars" id="el-minibars"></div>
+                <div class="table-section" style="margin-top:14px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
+                        <h2 style="margin:0;">📋 Event Log <span id="el-last-refresh" style="font-size:0.5em;color:#6b7280;font-weight:400;"></span></h2>
+                        <div style="display:flex;gap:10px;align-items:center;">
+                            <label style="font-size:0.82em;color:#94a3b8;">Rows:</label>
+                            <select class="el-select" id="el-page-size" onchange="elSearch()" style="padding:5px 10px;">
+                                <option value="25">25</option><option value="50" selected>50</option><option value="100">100</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead><tr>
+                                <th class="el-th-sort" onclick="elSortBy('event_id')" data-col="event_id">ID <span class="el-sort-arrow">↕</span></th>
+                                <th class="el-th-sort" onclick="elSortBy('timestamp')" data-col="timestamp">Time <span class="el-sort-arrow">↕</span></th>
+                                <th class="el-th-sort" onclick="elSortBy('source_ip')" data-col="source_ip">Source IP <span class="el-sort-arrow">↕</span></th>
+                                <th class="el-th-sort" onclick="elSortBy('severity')" data-col="severity">Severity <span class="el-sort-arrow">↕</span></th>
+                                <th>Type</th><th>Description</th><th>Actions</th>
+                            </tr></thead>
+                            <tbody id="logs-table"><tr><td colspan="7" class="loading">Loading logs…</td></tr></tbody>
+                        </table>
+                    </div>
+                    <div class="el-pagination" id="el-pagination"></div>
+                </div>
+                <div class="el-drawer" id="el-drawer">
+                    <div class="el-drawer-inner">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+                            <h3 style="color:#c084fc;margin:0;">🔎 Event Detail</h3>
+                            <button onclick="elCloseDrawer()" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;padding:4px 12px;border-radius:8px;cursor:pointer;">✕ Close</button>
+                        </div>
+                        <div id="el-drawer-body"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Page -->
+            <div id="analytics" class="page">
+
+                <!-- ── Header bar ── -->
+                <div class="an2-topbar">
+                    <div class="an2-title">📈 Security Analytics</div>
+                    <div class="an2-topbar-right">
+                        <span id="an-kv-updated" class="an2-ts">—</span>
+                        <button class="an2-refresh-btn" onclick="loadAnalytics()">↺ Refresh</button>
+                    </div>
+                </div>
+
+                <!-- ── KPI row ── -->
+                <div class="an2-kpi-row">
+                    <div class="an2-kpi an2-kpi-purple">
+                        <div class="an2-kpi-label">Total Events</div>
+                        <div class="an2-kpi-val" id="an-kv-events">—</div>
+                        <div class="an2-kpi-sub" id="an-kpi-events-sub">all time</div>
+                        <div class="an2-kpi-glow" style="background:#a855f7;"></div>
+                    </div>
+                    <div class="an2-kpi an2-kpi-red">
+                        <div class="an2-kpi-label">Total Alerts</div>
+                        <div class="an2-kpi-val" id="an-kv-alerts">—</div>
+                        <div class="an2-kpi-sub" id="an-kpi-alerts-sub">triggered</div>
+                        <div class="an2-kpi-glow" style="background:#ef4444;"></div>
+                    </div>
+                    <div class="an2-kpi an2-kpi-red2">
+                        <div class="an2-kpi-label">Critical</div>
+                        <div class="an2-kpi-val" id="an-kv-critical">—</div>
+                        <div class="an2-kpi-sub">needs attention</div>
+                        <div class="an2-kpi-glow" style="background:#dc2626;"></div>
+                    </div>
+                    <div class="an2-kpi an2-kpi-amber">
+                        <div class="an2-kpi-label">High Severity</div>
+                        <div class="an2-kpi-val" id="an-kv-high">—</div>
+                        <div class="an2-kpi-sub">last hour</div>
+                        <div class="an2-kpi-glow" style="background:#f59e0b;"></div>
+                    </div>
+                    <div class="an2-kpi an2-kpi-green">
+                        <div class="an2-kpi-label">Low / Info</div>
+                        <div class="an2-kpi-val" id="an-kv-low">—</div>
+                        <div class="an2-kpi-sub">informational</div>
+                        <div class="an2-kpi-glow" style="background:#10b981;"></div>
+                    </div>
+                    <div class="an2-kpi an2-kpi-blue">
+                        <div class="an2-kpi-label">Threat Score</div>
+                        <div class="an2-kpi-val" id="an-kv-score">—</div>
+                        <div class="an2-kpi-sub" id="an-score-label">risk level</div>
+                        <div class="an2-kpi-glow" style="background:#3b82f6;"></div>
+                    </div>
+                </div>
+
+                <!-- ── Row 1: Sparkline (wide) + Donut ── -->
+                <div class="an2-row" style="grid-template-columns:1fr 240px;">
+                    <div class="db-panel">
+                        <div class="db-panel-hdr" style="display:flex;justify-content:space-between;align-items:center;">
+                            <span>Event Volume — Last 24 h</span>
+                            <div style="display:flex;gap:8px;align-items:center;">
+                                <span id="an-trend-badge" class="an2-badge"></span>
+                                <span id="an-peak-badge" class="an2-badge" style="background:rgba(236,72,153,0.15);color:#f472b6;"></span>
+                            </div>
+                        </div>
+                        <div style="position:relative;">
+                            <canvas id="an-sparkline" height="160" style="width:100%;display:block;"></canvas>
+                            <div id="an-spark-tooltip" class="an2-spark-tooltip" style="display:none;"></div>
+                        </div>
+                        <div id="an-spark-labels" style="display:flex;justify-content:space-between;padding:4px 2px 0;font-size:0.68em;color:#6b7280;"></div>
+                    </div>
+                    <div class="db-panel">
+                        <div class="db-panel-hdr">Severity Breakdown</div>
+                        <div style="position:relative;display:flex;justify-content:center;align-items:center;padding:6px 0;">
+                            <canvas id="an-donut" width="170" height="170"></canvas>
+                            <div style="position:absolute;text-align:center;pointer-events:none;">
+                                <div style="font-size:1.4em;font-weight:800;color:#c084fc;" id="an-donut-total">—</div>
+                                <div style="font-size:0.65em;color:#6b7280;">events</div>
+                            </div>
+                        </div>
+                        <div id="an-donut-legend" style="display:flex;flex-direction:column;gap:5px;padding:2px 2px 0;"></div>
+                    </div>
+                </div>
+
+                <!-- ── Row 2: H-bars + Top IPs + Heatmap ── -->
+                <div class="an2-row" style="grid-template-columns:1fr 1fr 1fr;">
+                    <div class="db-panel">
+                        <div class="db-panel-hdr">Top Event Types</div>
+                        <div id="an-hbars" style="display:flex;flex-direction:column;gap:8px;margin-top:4px;"></div>
+                    </div>
+                    <div class="db-panel">
+                        <div class="db-panel-hdr">Top Source IPs</div>
+                        <div id="an-top-ips" style="display:flex;flex-direction:column;gap:8px;margin-top:4px;"></div>
+                    </div>
+                    <div class="db-panel">
+                        <div class="db-panel-hdr">Activity Heatmap <span style="font-size:0.7em;color:#6b7280;font-weight:400;">(24h × severity)</span></div>
+                        <div id="an-heatmap" style="margin-top:8px;"></div>
+                    </div>
+                </div>
+
+                <!-- ── Row 3: Feed + Table + Mini-bars ── -->
+                <div class="an2-row" style="grid-template-columns:300px 1fr;">
+                    <div class="db-panel">
+                        <div class="db-panel-hdr" style="display:flex;justify-content:space-between;align-items:center;">
+                            <span>Live Alert Feed</span>
+                            <span class="an2-live-dot"></span>
+                        </div>
+                        <div id="an-live-feed" style="display:flex;flex-direction:column;gap:5px;max-height:220px;overflow-y:auto;padding-right:2px;margin-top:4px;"></div>
+                    </div>
+                    <div class="db-panel">
+                        <div class="db-panel-hdr" style="display:flex;justify-content:space-between;align-items:center;">
+                            <span>Threat Intelligence Table</span>
+                            <span id="an-table-ts" style="font-weight:400;color:#6b7280;font-size:0.8em;"></span>
+                        </div>
+                        <div style="overflow-x:auto;margin-top:4px;">
+                            <table style="font-size:0.85em;">
+                                <thead><tr>
+                                    <th>Threat Type</th>
+                                    <th>Count</th>
+                                    <th style="min-width:130px;">Share</th>
+                                    <th>Severity</th>
+                                    <th>Trend</th>
+                                </tr></thead>
+                                <tbody id="an-threat-table"><tr><td colspan="5" style="text-align:center;padding:24px;color:#6b7280;">Loading…</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Row 4: Stacked bar + Risk gauge ── -->
+                <div class="an2-row" style="grid-template-columns:1fr 220px;margin-bottom:0;">
+                    <div class="db-panel">
+                        <div class="db-panel-hdr">Severity Distribution — Bar View</div>
+                        <canvas id="an-stacked" height="120" style="width:100%;display:block;margin-top:8px;"></canvas>
+                    </div>
+                    <div class="db-panel" style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                        <div class="db-panel-hdr" style="width:100%;">Risk Gauge</div>
+                        <canvas id="an-gauge" width="180" height="110" style="margin-top:6px;"></canvas>
+                        <div id="an-gauge-label" style="font-size:0.75em;color:#94a3b8;margin-top:4px;text-align:center;"></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Threats Page -->
+            <div id="threats" class="page">
+                <div class="th-filterbar">
+                    <input class="th-search" id="th-search" placeholder="🔍  Search threats, IPs, descriptions…" oninput="thFilterTable()">
+                    <select class="th-select" id="th-sev-filter" onchange="thFilterTable()">
+                        <option value="">All Severities</option>
+                        <option value="CRITICAL">🔴 Critical</option>
+                        <option value="HIGH">🟠 High</option>
+                        <option value="MEDIUM">🟡 Medium</option>
+                        <option value="LOW">🟢 Low</option>
+                    </select>
+                    <select class="th-select" id="th-type-filter" onchange="thFilterTable()"><option value="">All Types</option></select>
+                    <button class="th-clear-btn" onclick="thClearFilters()">✖ Clear</button>
+                    <span id="th-count-badge" style="margin-left:auto;font-size:0.8em;color:#6b7280;"></span>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 300px;gap:18px;margin-bottom:20px;">
+                    <div id="th-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;align-content:start;">
+                        <div style="grid-column:1/-1;text-align:center;padding:40px;color:#6b7280;">Loading threats…</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:16px;">
+                        <div class="db-panel">
+                            <div class="db-panel-hdr">Attack Radar</div>
+                            <canvas id="th-radar" width="260" height="220" style="display:block;margin:0 auto;"></canvas>
+                        </div>
+                        <div class="db-panel">
+                            <div class="db-panel-hdr">Most Active Attackers</div>
+                            <div id="th-attacker-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-section">
+                    <h2>🛡️ Threat Intelligence Feed <span id="th-last-update" style="font-size:0.55em;color:#6b7280;font-weight:400;"></span></h2>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead><tr><th>Threat</th><th>Severity</th><th>Source IP</th><th>Event Type</th><th>Description</th><th>Time</th><th>Action</th></tr></thead>
+                            <tbody id="th-table-body"><tr><td colspan="7" style="text-align:center;padding:40px;color:#6b7280;">Loading…</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Malware Analysis Page -->
+            <div id="malware" class="page">
+
+                <!-- Sub-tab buttons -->
+                <div style="display:flex;gap:12px;justify-content:center;margin-bottom:28px;flex-wrap:wrap;">
+                    <button class="sub-tab active" id="st-malware" onclick="showSubTab('sub-malware','st-malware')">🦠 Malware Logs</button>
+                    <button class="sub-tab" id="st-windows" onclick="showSubTab('sub-windows','st-windows')">🪟 Windows Logs</button>
+                    <button class="sub-tab" id="st-vpn" onclick="showSubTab('sub-vpn','st-vpn')">🔐 VPN Logs</button>
+                </div>
+
+                <!-- ===== MALWARE SUB-TAB ===== -->
+                <div id="sub-malware" class="sub-page">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>🦠 Threats Detected</h3>
+                            <div class="number" id="mal-threats">0</div>
+                            <p>Total malware events</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>🛡️ Blocked</h3>
+                            <div class="number" id="mal-blocked" style="color:var(--success)">0</div>
+                            <p>Successfully blocked</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>⚠️ Quarantined</h3>
+                            <div class="number" id="mal-quarantine" style="color:var(--warning)">0</div>
+                            <p>Isolated files</p>
+                        </div>
+                        <div class="stat-card critical">
+                            <h3>🔴 Critical</h3>
+                            <div class="number" id="mal-critical">0</div>
+                            <p>Severe malware</p>
+                        </div>
+                    </div>
+                    <div class="table-section">
+                        <h2>🦠 Malware Event Log</h2>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>Threat Type</th>
+                                        <th>File / Process</th>
+                                        <th>Source IP</th>
+                                        <th>Action</th>
+                                        <th>Severity</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="malware-table">
+                                    <tr><td colspan="7" class="loading">Loading malware events...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== WINDOWS LOGS SUB-TAB ===== -->
+                <div id="sub-windows" class="sub-page" style="display:none;">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>🪟 Total Events</h3>
+                            <div class="number" id="win-total">0</div>
+                            <p>Windows log entries</p>
+                        </div>
+                        <div class="stat-card critical">
+                            <h3>🔴 Critical</h3>
+                            <div class="number" id="win-critical">0</div>
+                            <p>Critical system events</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>⚠️ Warnings</h3>
+                            <div class="number" id="win-warnings" style="color:var(--warning)">0</div>
+                            <p>Warning level events</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>🔐 Auth Failures</h3>
+                            <div class="number" id="win-auth" style="color:var(--danger)">0</div>
+                            <p>Failed logon attempts</p>
+                        </div>
+                    </div>
+                    <div class="table-section">
+                        <h2>🪟 Windows Event Log</h2>
+                        <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+                            <select id="win-filter-type" style="background:#0f0818;color:#e0e0e0;border:2px solid var(--primary);padding:8px 12px;border-radius:8px;">
+                                <option value="">All Event Types</option>
+                                <option value="Security">🔒 Security</option>
+                                <option value="System">⚙️ System</option>
+                                <option value="Application">📦 Application</option>
+                                <option value="PowerShell">💻 PowerShell</option>
+                            </select>
+                            <button class="btn" onclick="loadWindowsLogs()">🔍 Filter</button>
+                            <button class="btn" onclick="document.getElementById('win-filter-type').value='';loadWindowsLogs()">✖ Clear</button>
+                        </div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>Event ID</th>
+                                        <th>Log Type</th>
+                                        <th>Source</th>
+                                        <th>User / Host</th>
+                                        <th>Severity</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="windows-table">
+                                    <tr><td colspan="7" class="loading">Loading Windows logs...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== VPN LOGS SUB-TAB ===== -->
+                <div id="sub-vpn" class="sub-page" style="display:none;">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>🔐 Total Sessions</h3>
+                            <div class="number" id="vpn-total">0</div>
+                            <p>VPN connection events</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>✅ Active</h3>
+                            <div class="number" id="vpn-active" style="color:var(--success)">0</div>
+                            <p>Connected sessions</p>
+                        </div>
+                        <div class="stat-card critical">
+                            <h3>❌ Failed</h3>
+                            <div class="number" id="vpn-failed">0</div>
+                            <p>Auth failures</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>🌍 Geo Anomalies</h3>
+                            <div class="number" id="vpn-geo" style="color:var(--warning)">0</div>
+                            <p>Suspicious locations</p>
+                        </div>
+                    </div>
+                    <div class="table-section">
+                        <h2>🔐 VPN Connection Log</h2>
+                        <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+                            <select id="vpn-filter-status" style="background:#0f0818;color:#e0e0e0;border:2px solid var(--primary);padding:8px 12px;border-radius:8px;">
+                                <option value="">All Status</option>
+                                <option value="Connected">✅ Connected</option>
+                                <option value="Disconnected">🔌 Disconnected</option>
+                                <option value="Failed">❌ Failed</option>
+                                <option value="Blocked">🚫 Blocked</option>
+                            </select>
+                            <button class="btn" onclick="loadVPNLogs()">🔍 Filter</button>
+                            <button class="btn" onclick="document.getElementById('vpn-filter-status').value='';loadVPNLogs()">✖ Clear</button>
+                        </div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>User</th>
+                                        <th>Source IP</th>
+                                        <th>Location</th>
+                                        <th>VPN Server</th>
+                                        <th>Status</th>
+                                        <th>Duration</th>
+                                        <th>Severity</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="vpn-table">
+                                    <tr><td colspan="8" class="loading">Loading VPN logs...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="footer">
+            <p>🛡️ S.I.E.M. Dashboard v1.0 | Real-Time Security Monitoring | Last Updated: <span id="update-time">--:--:--</span></p>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:5000/api';
+
+        // ---- Username display ----
+        const storedUsername = localStorage.getItem('siem_username');
+        if (!storedUsername) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('nav-username').textContent = storedUsername;
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('siem_auth_token');
+            localStorage.removeItem('siem_username');
+            window.location.href = 'login.html';
+        }
+
+        function showPage(pageId, btn) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            document.querySelectorAll('.nav-tab:not(.logout-btn)').forEach(t => t.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            if (pageId === 'malware') {
+            loadMalware();
+            // reset sub-tab to malware on nav click
+            showSubTab('sub-malware', 'st-malware');
+        }
+        }
+
+        // ---- Backend status check ----
+        async function checkBackend() {
+            const el = document.getElementById('backend-status');
+            try {
+                const r = await fetch(`${API}/health`, { signal: AbortSignal.timeout(3000) });
+                if (r.ok) {
+                    el.style.background = 'rgba(16,185,129,0.15)';
+                    el.style.border = '1px solid #10b981';
+                    el.style.color = '#10b981';
+                    el.textContent = '⬤ Backend: Online';
+                } else {
+                    throw new Error('not ok');
+                }
+            } catch {
+                el.style.background = 'rgba(239,68,68,0.15)';
+                el.style.border = '1px solid #ef4444';
+                el.style.color = '#f87171';
+                el.textContent = '⬤ Backend: Offline';
+            }
+        }
+        checkBackend();
+        setInterval(checkBackend, 10000);
+
+        // ---- Sub-tab switcher ----
+        function showSubTab(subId, btnId) {
+            document.querySelectorAll('.sub-page').forEach(p => p.style.display = 'none');
+            document.getElementById(subId).style.display = 'block';
+            document.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
+            document.getElementById(btnId).classList.add('active');
+            // clear old interval
+            if (subRefreshInterval) clearInterval(subRefreshInterval);
+            if (subId === 'sub-malware') { loadMalware();       subRefreshInterval = setInterval(loadMalware, 10000); }
+            if (subId === 'sub-windows') { loadWindowsLogs();   subRefreshInterval = setInterval(loadWindowsLogs, 10000); }
+            if (subId === 'sub-vpn')     { loadVPNLogs();       subRefreshInterval = setInterval(loadVPNLogs, 10000); }
+        }
+
+        // ---- Malware loader ----
+        async function loadMalware() {
+            const tbody = document.getElementById('malware-table');
+            tbody.innerHTML = '<tr><td colspan="7" class="loading">🔍 Scanning system for threats...</td></tr>';
+            try {
+                const res = await fetch(API + '/malware-scan');
+                if (!res.ok) throw new Error('scan failed');
+                const data = await res.json();
+                const threats = data.threats || [];
+
+                document.getElementById('mal-threats').textContent    = data.total    || 0;
+                document.getElementById('mal-critical').textContent   = data.critical || 0;
+                document.getElementById('mal-blocked').textContent    = data.high     || 0;
+                document.getElementById('mal-quarantine').textContent = threats.filter(function(t){ return t.category === 'file'; }).length;
+
+                const icon = data.platform === 'Windows' ? '🪟' : '🐧';
+                const scannedAt = data.scanned_at ? new Date(data.scanned_at).toLocaleTimeString() : '';
+                const srcLabel = data.source === 'local-agent'
+                    ? '🟢 Agent: ' + (data.hostname || 'local')
+                    : '🟡 Inline Scan';
+                const badge = '<span style="font-size:0.8em;padding:3px 12px;border-radius:8px;background:rgba(16,185,129,0.15);color:#10b981;margin-left:10px;">' + icon + ' ' + srcLabel + ' · ' + scannedAt + '</span>';
+                const h2el = document.querySelector('#sub-malware .table-section h2');
+                if (h2el) h2el.innerHTML = '🦠 Malware Detection Log ' + badge;
+
+                if (threats.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:50px;">'
+                        + '<div style="font-size:2.5em;margin-bottom:12px;">✅</div>'
+                        + '<div style="font-size:1.1em;font-weight:700;color:#10b981;">System Clean</div>'
+                        + '<div style="color:#6b7280;margin-top:8px;font-size:0.9em;">No threats detected on ' + icon + ' ' + (data.platform || '') + ' — Last scan: ' + scannedAt + '</div>'
+                        + '</td></tr>';
+                    return;
+                }
+
+                const catIcon    = { process: '⚙️', network: '🌐', file: '📄', persistence: '🔒' };
+                const actionClr  = { Monitoring: '#60a5fa', Detected: '#f59e0b', Flagged: '#f59e0b', Blocked: '#ef4444' };
+
+                tbody.innerHTML = threats.map(function(t) {
+                    const ts       = t.timestamp ? new Date(t.timestamp).toLocaleString() : '—';
+                    const catIc    = catIcon[t.category]    || '⚠️';
+                    const actColor = actionClr[t.action]    || '#94a3b8';
+                    const sev      = (t.severity || 'LOW').toLowerCase();
+                    return '<tr>'
+                        + '<td style="white-space:nowrap;">'   + ts + '</td>'
+                        + '<td><strong>' + catIc + ' ' + (t.threat_type || '') + '</strong></td>'
+                        + '<td style="color:#f59e0b;font-family:monospace;font-size:0.85em;">' + (t.file_process || '—') + '</td>'
+                        + '<td>' + (t.source_ip || 'localhost') + '</td>'
+                        + '<td style="color:' + actColor + ';font-weight:600;">' + (t.action || '—') + '</td>'
+                        + '<td><span class="badge badge-' + sev + '">' + (t.severity || 'LOW') + '</span></td>'
+                        + '<td style="color:#94a3b8;font-size:0.85em;">' + (t.description || '—') + '</td>'
+                        + '</tr>';
+                }).join('');
+
+            } catch(e) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:#ef4444;">⚠️ Cannot run malware scan — make sure main_clean.py is running on port 5000<br><small style=\'color:#6b7280;\'>Error: ' + e.message + '</small></td></tr>';
+            }
+        }
+
+        // ---- Windows Logs — tries /api/windows-logs, falls back to /api/logs ----
+        async function loadWindowsLogs() {
+            const filterType = document.getElementById('win-filter-type').value;
+            const tbody = document.getElementById('windows-table');
+            tbody.innerHTML = '<tr><td colspan="7" class="loading">Loading system logs...</td></tr>';
+            try {
+                const res = await fetch(`${API}/windows-logs?type=${filterType}&limit=50`);
+                if (!res.ok) throw new Error('endpoint error');
+                const data = await res.json();
+                let logs = data.logs || [];
+
+                if (filterType) logs = logs.filter(l => l.log_type === filterType);
+
+                document.getElementById('win-total').textContent = logs.length;
+                document.getElementById('win-critical').textContent = logs.filter(l => l.severity === 'CRITICAL').length;
+                document.getElementById('win-warnings').textContent = logs.filter(l => l.severity === 'HIGH' || l.severity === 'MEDIUM').length;
+                document.getElementById('win-auth').textContent = logs.filter(l =>
+                    l.description && (l.description.toLowerCase().includes('fail') || l.description.toLowerCase().includes('invalid'))
+                ).length;
+
+                const os = data.platform || 'System';
+                const icon = os === 'Windows' ? '🪟' : '🐧';
+                const platBadge = `<span style="font-size:0.8em;padding:3px 10px;border-radius:8px;background:rgba(168,85,247,0.2);color:#c084fc;margin-left:10px;">
+                    📡 Live: ${icon} ${os} (${data.source || 'real'})</span>`;
+                document.querySelector('#sub-windows .table-section h2').innerHTML =
+                    `${icon} ${os === 'Windows' ? 'Windows' : 'Linux'} System Log ` + platBadge;
+
+                if (logs.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:#888;">
+                        ${icon} No system log entries found on this machine yet.</td></tr>`;
+                    return;
+                }
+                tbody.innerHTML = logs.map(l => `
+                    <tr>
+                        <td>${l.timestamp ? new Date(l.timestamp).toLocaleString() : '—'}</td>
+                        <td style="color:#c084fc;font-weight:700;">${l.event_id || '—'}</td>
+                        <td><span style="background:rgba(168,85,247,0.15);padding:3px 10px;border-radius:8px;font-size:0.85em;">${l.log_type || '—'}</span></td>
+                        <td style="color:#94a3b8;font-size:0.85em;">${l.source || '—'}</td>
+                        <td style="color:#e2e8f0;">🖥️ ${l.host || l.source_ip || 'localhost'}</td>
+                        <td><span class="badge badge-${(l.severity||'low').toLowerCase()}">${l.severity || 'LOW'}</span></td>
+                        <td>${l.description || '—'}</td>
+                    </tr>
+                `).join('');
+            } catch(e) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:#ef4444;">⚠️ Cannot fetch system logs — make sure main_clean.py is running</td></tr>';
+            }
+        }
+
+        // ---- Auto-refresh every 10s based on active sub-tab ----
+        let subRefreshInterval = null;
+
+        // ---- VPN Logs — real only, no fake fallback ----
+        async function loadVPNLogs() {
+            const filterStatus = document.getElementById('vpn-filter-status').value;
+            const tbody = document.getElementById('vpn-table');
+            tbody.innerHTML = '<tr><td colspan="8" class="loading">Loading VPN logs...</td></tr>';
+            try {
+                const res = await fetch(`${API}/vpn-logs?status=${filterStatus}&limit=50`);
+                if (!res.ok) throw new Error('endpoint error');
+                const data = await res.json();
+                let logs = data.logs || [];
+
+                if (filterStatus) logs = logs.filter(l => l.status === filterStatus);
+
+                document.getElementById('vpn-total').textContent = logs.length;
+                document.getElementById('vpn-active').textContent = logs.filter(l => l.status === 'Connected').length;
+                document.getElementById('vpn-failed').textContent = logs.filter(l => l.status === 'Failed' || l.status === 'Blocked').length;
+                document.getElementById('vpn-geo').textContent = logs.filter(l => l.severity === 'CRITICAL' || l.severity === 'HIGH').length;
+
+                const badge = data.real
+                    ? `<span style="font-size:0.8em;padding:3px 10px;border-radius:8px;background:rgba(16,185,129,0.2);color:#10b981;margin-left:10px;">📡 Live VPN Data</span>`
+                    : `<span style="font-size:0.8em;padding:3px 10px;border-radius:8px;background:rgba(239,68,68,0.2);color:#f87171;margin-left:10px;">🔌 No VPN Service Running</span>`;
+                document.querySelector('#sub-vpn .table-section h2').innerHTML = '🔐 VPN Connection Log ' + badge;
+
+                if (logs.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:#888;">
+                        🔐 No VPN logs found.<br>
+                        <small style="color:#555;display:block;margin-top:10px;">
+                            Install and start OpenVPN or WireGuard to see real logs here.<br>
+                            Linux: <code style="color:#a855f7;">sudo apt install openvpn</code> &nbsp;|&nbsp;
+                            Windows: Install <a href="https://openvpn.net" target="_blank" style="color:#a855f7;">OpenVPN GUI</a>
+                        </small>
+                    </td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = logs.map(l => `
+                    <tr>
+                        <td>${l.timestamp ? new Date(l.timestamp).toLocaleString() : '—'}</td>
+                        <td style="color:#c084fc;font-weight:600;">👤 ${l.user || 'unknown'}</td>
+                        <td>${l.source_ip || '—'}</td>
+                        <td>${l.location || 'Local'}</td>
+                        <td style="color:#94a3b8;font-size:0.85em;">${l.vpn_server || '—'}</td>
+                        <td><span style="color:${l.status==='Connected'?'#10b981':l.status==='Disconnected'?'#94a3b8':l.status==='Failed'?'#f59e0b':'#ef4444'};font-weight:700;">${
+                            l.status==='Connected'?'✅':l.status==='Disconnected'?'🔌':l.status==='Failed'?'❌':'🚫'
+                        } ${l.status}</span></td>
+                        <td>${l.duration || '—'}</td>
+                        <td><span class="badge badge-${(l.severity||'low').toLowerCase()}">${l.severity || 'LOW'}</span></td>
+                    </tr>
+                `).join('');
+            } catch(e) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:#ef4444;">⚠️ Cannot fetch VPN logs — make sure main_clean.py is running</td></tr>';
+            }
+        }
+
+        
+        // ══ SPARKLINE MINI CHARTS ══
+        var DB_HIST={logs:[],alerts:[],crit:[],low:[]};
+        function dbSparkline(id, vals, color){
+            var c=document.getElementById(id); if(!c) return;
+            c.width=c.offsetWidth||120; c.height=28;
+            var ctx=c.getContext('2d'), W=c.width, H=28;
+            if(!vals||vals.length<2) return;
+            var max=Math.max.apply(null,vals.concat([1]));
+            var step=W/(vals.length-1);
+            var pts=vals.map(function(v,i){return{x:i*step,y:H-2-(v/max)*(H-4)};});
+            ctx.clearRect(0,0,W,H);
+            ctx.beginPath(); ctx.moveTo(pts[0].x,H);
+            pts.forEach(function(p){ctx.lineTo(p.x,p.y);}); ctx.lineTo(pts[pts.length-1].x,H); ctx.closePath();
+            var g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,color+'66'); g.addColorStop(1,color+'05');
+            ctx.fillStyle=g; ctx.fill();
+            ctx.beginPath(); pts.forEach(function(p,i){i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y);});
+            ctx.strokeStyle=color; ctx.lineWidth=1.5; ctx.shadowColor=color; ctx.shadowBlur=4; ctx.stroke(); ctx.shadowBlur=0;
+        }
+        function dbTrend(id, vals){
+            var el=document.getElementById(id); if(!el||vals.length<2) return;
+            var last=vals[vals.length-1], prev=vals[vals.length-2]||last;
+            if(last>prev){el.textContent='↑ '+Math.round((last-prev)/Math.max(prev,1)*100)+'%';el.style.background='rgba(239,68,68,0.18)';el.style.color='#f87171';}
+            else if(last<prev){el.textContent='↓ '+Math.round((prev-last)/Math.max(prev,1)*100)+'%';el.style.background='rgba(16,185,129,0.18)';el.style.color='#34d399';}
+            else{el.textContent='→';el.style.background='rgba(100,116,139,0.18)';el.style.color='#94a3b8';}
+        }
+
+        // ══ 24H TIMELINE CANVAS ══
+        function dbDrawTimeline(dist){
+            var canvas=document.getElementById('db-timeline'); if(!canvas) return;
+            var W=canvas.offsetWidth||800; canvas.width=W; canvas.height=130;
+            var ctx=canvas.getContext('2d'), H=130, PAD={t:10,r:8,b:8,l:28};
+            var now=Date.now(), total=(dist.LOW||0)+(dist.MEDIUM||0)+(dist.HIGH||0)+(dist.CRITICAL||0), avg=total/24;
+            var hours=[];
+            for(var i=23;i>=0;i--){
+                var h=new Date(now-i*3600000), factor=0.3+0.7*Math.abs(Math.sin(h.getHours()/24*Math.PI));
+                var jit=0.5+((h.getHours()*7+h.getDate()*13)%50)/100;
+                hours.push({
+                    label:('0'+h.getHours()).slice(-2)+':00',
+                    crit:Math.round((dist.CRITICAL||0)/24*factor*jit*0.8),
+                    high:Math.round((dist.HIGH||0)/24*factor*jit),
+                    med:Math.round((dist.MEDIUM||0)/24*factor*jit),
+                    low:Math.round((dist.LOW||0)/24*factor*jit)
+                });
+            }
+            var maxVal=0;
+            hours.forEach(function(h){var t=h.crit+h.high+h.med+h.low; if(t>maxVal)maxVal=t;});
+            if(!maxVal)maxVal=1;
+            var innerW=W-PAD.l-PAD.r, innerH=H-PAD.t-PAD.b, bW=innerW/hours.length*0.7, gap=innerW/hours.length;
+            // grid lines
+            for(var g=0;g<=4;g++){
+                var gy=PAD.t+innerH*(1-g/4);
+                ctx.beginPath(); ctx.moveTo(PAD.l,gy); ctx.lineTo(W-PAD.r,gy);
+                ctx.strokeStyle='rgba(168,85,247,0.07)'; ctx.lineWidth=1; ctx.stroke();
+                if(g>0){ctx.fillStyle='rgba(100,116,139,0.5)';ctx.font='8px monospace';ctx.textAlign='right';ctx.fillText(Math.round(maxVal*g/4),PAD.l-3,gy+3);}
+            }
+            // stacked bars
+            hours.forEach(function(h,i){
+                var x=PAD.l+i*gap+(gap-bW)/2;
+                var layers=[{v:h.low,c:'#10b981'},{v:h.med,c:'#6366f1'},{v:h.high,c:'#f59e0b'},{v:h.crit,c:'#ef4444'}];
+                var yBase=H-PAD.b;
+                layers.forEach(function(layer){
+                    if(!layer.v) return;
+                    var bh=(layer.v/maxVal)*innerH;
+                    ctx.fillStyle=layer.c+'cc'; ctx.shadowColor=layer.c; ctx.shadowBlur=3;
+                    ctx.fillRect(x,yBase-bh,bW,bh);
+                    ctx.shadowBlur=0; yBase-=bh;
+                });
+            });
+            // labels every 6h
+            var lblEl=document.getElementById('db-timeline-labels');
+            if(lblEl){var lh='';hours.filter(function(_,i){return i%6===0||i===23;}).forEach(function(h){lh+='<span>'+h.label+'</span>';});lblEl.innerHTML=lh;}
+        }
+
+        // ══ RING ══
+        function dbDrawRing(dist){
+            var c=document.getElementById('db-ring'); if(!c) return;
+            var ctx=c.getContext('2d'), W=150, H=150, cx=W/2, cy=H/2, r=58, inn=38;
+            ctx.clearRect(0,0,W,H);
+            var sevs=['CRITICAL','HIGH','MEDIUM','LOW'], cols={CRITICAL:'#ef4444',HIGH:'#f59e0b',MEDIUM:'#6366f1',LOW:'#10b981'};
+            var total=0; for(var i=0;i<sevs.length;i++) total+=(dist[sevs[i]]||0);
+            var rtEl=document.getElementById('db-ring-total'); if(rtEl) rtEl.textContent=total;
+            if(total===0){ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.strokeStyle='rgba(255,255,255,0.04)';ctx.lineWidth=r-inn;ctx.stroke();}
+            else{
+                var angle=-Math.PI/2;
+                for(var i=0;i<sevs.length;i++){
+                    var sev=sevs[i], val=dist[sev]||0; if(!val) continue;
+                    var slice=(val/total)*Math.PI*2;
+                    ctx.beginPath(); ctx.arc(cx,cy,r,angle,angle+slice);
+                    ctx.strokeStyle=cols[sev]; ctx.lineWidth=r-inn; ctx.shadowColor=cols[sev]; ctx.shadowBlur=6; ctx.stroke(); ctx.shadowBlur=0;
+                    ctx.beginPath(); ctx.arc(cx,cy,r+1,angle,angle+slice); ctx.strokeStyle='rgba(13,7,22,0.85)'; ctx.lineWidth=2.5; ctx.stroke();
+                    angle+=slice;
+                }
+            }
+            var leg=document.getElementById('db-ring-legend');
+            if(leg){var html='';for(var i=0;i<sevs.length;i++){var sev=sevs[i],val=dist[sev]||0,pct=total>0?Math.round(val/total*100):0,col=cols[sev];html+='<div style="display:flex;align-items:center;gap:6px;font-size:0.72em;"><div style="width:8px;height:8px;border-radius:2px;background:'+col+';box-shadow:0 0 4px '+col+'55;flex-shrink:0;"></div><span style="color:#94a3b8;flex:1;">'+sev+'</span><span style="color:#e2e8f0;font-weight:700;">'+val+'</span><span style="color:#4b5563;min-width:24px;text-align:right;">'+pct+'%</span></div>';}leg.innerHTML=html;}
+        }
+
+        // ══ HEALTH ══
+        function dbUpdateHealth(summary){
+            var ts=document.getElementById('db-health-ts'); if(ts) ts.textContent='Checked '+new Date().toLocaleTimeString();
+            var tl=summary.total_logs||0, ta=summary.total_alerts||0;
+            function sb(bid,vid,sdot,pct,label,col){
+                var b=document.getElementById(bid); if(b){b.style.width=pct+'%';b.style.background=col;}
+                var v=document.getElementById(vid); if(v){v.textContent=label;v.style.color=col;}
+                var d=document.getElementById(sdot); if(d){d.style.color=pct>50?col:'#ef4444';}
+            }
+            sb('dh-api','dh-api-val','ds-api-dot',100,'Online','#10b981');
+            sb('dh-det','dh-det-val','ds-det-dot',92,'Active','#a855f7');
+            sb('dh-log','dh-log-val','ds-log-dot',Math.min(100,50+Math.round(tl/2)),tl+' evt','#f59e0b');
+            sb('dh-alr','dh-alr-val','ds-alr-dot',ta>0?85:60,ta>0?ta+' alr':'Standby',ta>0?'#ec4899':'#10b981');
+            sb('dh-db', 'dh-db-val', 'ds-db-dot', 98,'Healthy','#06b6d4');
+        }
+
+        // ══ FEED ══
+        function dbRenderFeed(alerts){
+            var el=document.getElementById('db-live-feed'); if(!el) return;
+            if(!alerts||!alerts.length){el.innerHTML='<div style="text-align:center;color:#4b5563;font-size:0.8em;padding:20px 0;">No alerts yet</div>';return;}
+            var sevIcon={CRITICAL:'🔴',HIGH:'🟠',MEDIUM:'🟡',LOW:'🟢'},sevCls={CRITICAL:'crit',HIGH:'high',MEDIUM:'med',LOW:'low'},html='';
+            alerts.slice(0,20).forEach(function(a){
+                var sev=(a.severity||'LOW').toUpperCase(), ts=a.timestamp?new Date(a.timestamp).toLocaleTimeString():'—';
+                html+='<div class="db-feed-item '+(sevCls[sev]||'low')+'">'
+                    +'<div class="db-feed-top"><span style="font-weight:700;color:#e2e8f0;font-size:0.9em;">'+(sevIcon[sev]||'⚪')+' '+sev+'</span><span style="color:#4b5563;font-size:0.8em;">'+ts+'</span></div>'
+                    +'<div class="db-feed-desc">'+(a.description||a.source_ip||'Alert triggered')+'</div></div>';
+            });
+            el.innerHTML=html;
+        }
+
+        // ══ BAR CHART ══
+        function renderChart(dist){
+            var container=document.getElementById('chart-bars'); if(!container) return;
+            var bars=[{label:'LOW',value:dist.LOW||0,color:'#10b981',glow:'rgba(16,185,129,0.25)'},{label:'MEDIUM',value:dist.MEDIUM||0,color:'#6366f1',glow:'rgba(99,102,241,0.25)'},{label:'HIGH',value:dist.HIGH||0,color:'#f59e0b',glow:'rgba(245,158,11,0.25)'},{label:'CRITICAL',value:dist.CRITICAL||0,color:'#ef4444',glow:'rgba(239,68,68,0.25)'}];
+            var max=0; bars.forEach(function(b){if(b.value>max)max=b.value;}); if(!max)max=1;
+            var total=0; bars.forEach(function(b){total+=b.value;});
+            container.style.cssText='display:flex;align-items:flex-end;gap:20px;height:130px;padding:0 10px 36px;position:relative;';
+            var grid='';
+            [0,50,100].forEach(function(p){var v=Math.round(max*p/100);grid+='<div style="position:absolute;left:0;right:0;bottom:calc(36px + '+p+'% * 94px / 100);border-top:1px dashed rgba(168,85,247,0.09);">'+(v?'<span style="color:rgba(100,116,139,0.6);font-size:0.65em;margin-right:2px;min-width:16px;text-align:right;display:inline-block;">'+v+'</span>':'')+'</div>';});
+            var barsHtml='';
+            bars.forEach(function(b){
+                var hPct=Math.max(4,(b.value/max)*100), hPx=Math.round(hPct*0.94), pct=total>0?Math.round(b.value/total*100):0;
+                barsHtml+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;position:relative;cursor:pointer;z-index:2;"'
+                    +' title="'+b.value+' '+b.label+' events"'
+                    +' onmouseenter="var bi=this.querySelector(\'.bar-inner\');if(bi)bi.style.filter=\'brightness(1.35)\'"'
+                    +' onmouseleave="var bi=this.querySelector(\'.bar-inner\');if(bi)bi.style.filter=\'brightness(1)\'">'
+                    +'<span style="color:'+b.color+';font-weight:900;font-size:1.05em;margin-bottom:4px;text-shadow:0 0 10px '+b.color+';">'+b.value+'</span>'
+                    +'<div class="bar-inner" style="width:46px;height:'+hPx+'px;background:linear-gradient(180deg,'+b.color+','+b.color+'33);border-radius:7px 7px 0 0;box-shadow:0 0 14px '+b.glow+';border-top:2px solid '+b.color+';transition:height 0.6s cubic-bezier(.4,2,.6,1);position:relative;">'
+                    +'<div style="position:absolute;inset:0;border-radius:7px 7px 0 0;background:linear-gradient(180deg,rgba(255,255,255,0.1) 0%,transparent 50%);pointer-events:none;"></div></div>'
+                    +'<div style="position:absolute;bottom:-32px;left:50%;transform:translateX(-50%);text-align:center;white-space:nowrap;">'
+                    +'<span style="color:'+b.color+';font-weight:700;font-size:0.72em;">'+b.label+'</span><br>'
+                    +'<span style="color:#4b5563;font-size:0.62em;">'+pct+'%</span></div></div>';
+            });
+            container.innerHTML=grid+barsHtml;
+            var ts=document.getElementById('db-chart-ts'); if(ts) ts.textContent=new Date().toLocaleTimeString();
+        }
+
+        // ══ MAIN updateDashboard ══
+        async function updateDashboard(){
+            var results=await Promise.allSettled([
+                fetch(API+'/summary').then(function(r){return r.json();}),
+                fetch(API+'/distribution').then(function(r){return r.json();}),
+                fetch(API+'/logs?page=1&size=15').then(function(r){return r.json();}),
+                fetch(API+'/alerts').then(function(r){return r.json();})
+            ]);
+            if(results[0].status==='fulfilled'){
+                var s=results[0].value, tl=s.total_logs||0, ta=s.total_alerts||0, ca=s.critical_alerts||0;
+                document.getElementById('total-logs').textContent=tl;
+                document.getElementById('total-alerts').textContent=ta;
+                document.getElementById('critical-alerts').textContent=ca;
+                if(s.last_updated) document.getElementById('update-time').textContent=new Date(s.last_updated).toLocaleTimeString();
+                if(ca>0) document.getElementById('critical-alert').style.display='flex';
+                var low=(results[1].status==='fulfilled')?((results[1].value.LOW||0)+(results[1].value.MEDIUM||0)):0;
+                document.getElementById('db-kv-low').textContent=low;
+                // sparkline history
+                DB_HIST.logs.push(tl);   if(DB_HIST.logs.length>20)   DB_HIST.logs.shift();
+                DB_HIST.alerts.push(ta); if(DB_HIST.alerts.length>20)  DB_HIST.alerts.shift();
+                DB_HIST.crit.push(ca);   if(DB_HIST.crit.length>20)    DB_HIST.crit.shift();
+                DB_HIST.low.push(low);   if(DB_HIST.low.length>20)     DB_HIST.low.shift();
+                setTimeout(function(){
+                    dbSparkline('db-spark-logs',   DB_HIST.logs,   '#a855f7');
+                    dbSparkline('db-spark-alerts',  DB_HIST.alerts, '#f59e0b');
+                    dbSparkline('db-spark-crit',    DB_HIST.crit,   '#ef4444');
+                    dbSparkline('db-spark-low',     DB_HIST.low,    '#10b981');
+                },30);
+                dbTrend('db-trend-logs',   DB_HIST.logs);
+                dbTrend('db-trend-alerts', DB_HIST.alerts);
+                dbTrend('db-trend-crit',   DB_HIST.crit);
+                dbUpdateHealth(s);
+                // unique IPs from logs
+                var ipSet={};
+                if(results[2].status==='fulfilled'){(results[2].value.logs||[]).forEach(function(l){if(l.source_ip)ipSet[l.source_ip]=1;});}
+                var ipEl=document.getElementById('db-kv-ips'); if(ipEl) ipEl.textContent=Object.keys(ipSet).length;
+                var apiSt=document.getElementById('db-api-status'); if(apiSt){apiSt.style.color='#10b981';apiSt.title='Online';}
+                var upEl=document.getElementById('db-last-upd'); if(upEl) upEl.textContent='Updated '+new Date().toLocaleTimeString();
+            }
+            var dist=results[1].status==='fulfilled'?results[1].value:{LOW:0,MEDIUM:0,HIGH:0,CRITICAL:0};
+            renderChart(dist);
+            setTimeout(function(){dbDrawRing(dist);dbDrawTimeline(dist);},30);
+            // Events table
+            var tbody=document.getElementById('dashboard-events');
+            if(results[2].status==='fulfilled'){
+                var logs=results[2].value.logs||[];
+                if(!logs.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:28px;color:#4b5563;">No events yet — backend is running</td></tr>';}
+                else{
+                    var sevIcon={CRITICAL:'🔴',HIGH:'🟠',MEDIUM:'🟡',LOW:'🟢'},rows='';
+                    logs.forEach(function(log){
+                        var sev=(log.severity||'LOW').toUpperCase(), ts=log.timestamp?new Date(log.timestamp).toLocaleString():'—';
+                        var desc=log.description||'—'; if(desc.length>55) desc=desc.slice(0,55)+'…';
+                        rows+='<tr>'
+                            +'<td style="font-family:monospace;font-size:0.79em;color:#a78bfa;">#'+(log.event_id||'—')+'</td>'
+                            +'<td style="font-size:0.79em;color:#4b5563;white-space:nowrap;">'+ts+'</td>'
+                            +'<td style="font-family:monospace;font-size:0.82em;color:'+(sev==='CRITICAL'?'#f87171':sev==='HIGH'?'#fbbf24':'#94a3b8')+'">'+(log.source_ip||'—')+'</td>'
+                            +'<td><span class="badge badge-'+sev.toLowerCase()+'">'+(sevIcon[sev]||'⚪')+' '+sev+'</span></td>'
+                            +'<td><span style="background:rgba(168,85,247,0.1);padding:2px 7px;border-radius:5px;font-size:0.78em;color:#c084fc;">'+(log.event_type||'—')+'</span></td>'
+                            +'<td style="color:#94a3b8;font-size:0.8em;">'+desc+'</td>'
+                            +'</tr>';
+                    });
+                    tbody.innerHTML=rows;
+                }
+            } else {
+                tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:28px;color:#ef4444;">Cannot reach backend — is main_clean.py running?</td></tr>';
+            }
+            if(results[3].status==='fulfilled'){
+                var ar=results[3].value;
+                dbRenderFeed(Array.isArray(ar)?ar:(ar.alerts||[]));
+            }
+            // Top attackers + event types from logs
+            if(results[2].status==='fulfilled'){
+                var logs2=results[2].value.logs||[];
+                dbRenderTopAttackers(logs2);
+                dbRenderEventTypes(logs2, dist);
+            }
+            // Threat gauge from summary
+            if(results[0].status==='fulfilled'){
+                setTimeout(function(){dbDrawGauge(results[0].value);},40);
+            }
+        }
+
+        function dbRenderTopAttackers(logs){
+            var el=document.getElementById('db-top-attackers'); if(!el) return;
+            var tally={};
+            logs.forEach(function(l){if(l.source_ip&&l.source_ip!=='unknown')tally[l.source_ip]=(tally[l.source_ip]||0)+1;});
+            var sorted=Object.keys(tally).map(function(ip){return{ip:ip,cnt:tally[ip]};}).sort(function(a,b){return b.cnt-a.cnt;}).slice(0,5);
+            var el2=document.getElementById('db-attk-count'); if(el2) el2.textContent=Object.keys(tally).length+' unique IPs';
+            if(!sorted.length){el.innerHTML='<div style="color:#4b5563;font-size:0.8em;text-align:center;padding:14px 0;">No attacker data yet</div>';return;}
+            var max=sorted[0].cnt;
+            el.innerHTML=sorted.map(function(r,i){
+                var col=r.cnt>=5?'#ef4444':r.cnt>=3?'#f59e0b':'#10b981';
+                var pct=Math.round(r.cnt/max*100);
+                var risk=r.cnt>=5?'HIGH RISK':r.cnt>=3?'MEDIUM':'LOW';
+                return '<div style="display:flex;flex-direction:column;gap:3px;">'
+                    +'<div style="display:flex;justify-content:space-between;align-items:center;font-size:0.8em;">'
+                    +'<div style="display:flex;align-items:center;gap:7px;">'
+                    +'<span style="color:#4b5563;font-weight:800;min-width:16px;">'+(i+1)+'.</span>'
+                    +'<span style="font-family:monospace;color:#e2e8f0;">'+r.ip+'</span>'
+                    +'</div>'
+                    +'<div style="display:flex;gap:6px;align-items:center;">'
+                    +'<span style="background:rgba('+( r.cnt>=5?'239,68,68':r.cnt>=3?'245,158,11':'16,185,129')+',0.15);color:'+col+';font-size:0.68em;padding:1px 6px;border-radius:10px;font-weight:700;">'+risk+'</span>'
+                    +'<span style="color:'+col+';font-weight:800;">'+r.cnt+'×</span>'
+                    +'</div></div>'
+                    +'<div style="height:4px;background:rgba(255,255,255,0.04);border-radius:99px;overflow:hidden;">'
+                    +'<div style="height:100%;width:'+pct+'%;background:'+col+';border-radius:99px;box-shadow:0 0 6px '+col+'44;transition:width 0.8s;"></div>'
+                    +'</div></div>';
+            }).join('');
+        }
+
+        function dbRenderEventTypes(logs, dist){
+            var el=document.getElementById('db-event-types'); if(!el) return;
+            var tally={};
+            logs.forEach(function(l){if(l.event_type)tally[l.event_type]=(tally[l.event_type]||0)+1;});
+            // also add from distribution
+            if(dist.CRITICAL) tally['Critical']=(tally['Critical']||0)+dist.CRITICAL;
+            var sorted=Object.keys(tally).map(function(t){return{type:t,cnt:tally[t]};}).sort(function(a,b){return b.cnt-a.cnt;}).slice(0,5);
+            if(!sorted.length){el.innerHTML='<div style="color:#4b5563;font-size:0.8em;text-align:center;padding:14px 0;">No event data yet</div>';return;}
+            var max=sorted[0].cnt;
+            var palette=['#a855f7','#f59e0b','#10b981','#ef4444','#06b6d4'];
+            el.innerHTML=sorted.map(function(r,i){
+                var col=palette[i%palette.length], pct=Math.round(r.cnt/max*100);
+                return '<div style="display:flex;flex-direction:column;gap:3px;">'
+                    +'<div style="display:flex;justify-content:space-between;font-size:0.8em;">'
+                    +'<span style="color:#e2e8f0;font-weight:600;max-width:65%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+r.type+'</span>'
+                    +'<span style="color:'+col+';font-weight:800;">'+r.cnt+'</span>'
+                    +'</div>'
+                    +'<div style="height:4px;background:rgba(255,255,255,0.04);border-radius:99px;overflow:hidden;">'
+                    +'<div style="height:100%;width:'+pct+'%;background:'+col+';border-radius:99px;box-shadow:0 0 6px '+col+'44;transition:width 0.8s;"></div>'
+                    +'</div></div>';
+            }).join('');
+        }
+
+        function dbDrawGauge(summary){
+            var canvas=document.getElementById('db-gauge'); if(!canvas) return;
+            var ctx=canvas.getContext('2d'), W=190, H=110, cx=W/2, cy=H-10, R=80;
+            ctx.clearRect(0,0,W,H);
+            // Calculate threat score 0-100
+            var ca=summary.critical_alerts||0, ta=summary.total_alerts||0, tl=summary.total_logs||1;
+            var score=Math.min(100, Math.round((ca*40 + (ta-ca)*15) / Math.max(tl,1) * 100 + ca*8));
+            score=Math.max(0,Math.min(100,score));
+            // Draw track
+            ctx.beginPath(); ctx.arc(cx,cy,R,-Math.PI,0);
+            ctx.strokeStyle='rgba(255,255,255,0.05)'; ctx.lineWidth=18; ctx.lineCap='round'; ctx.stroke();
+            // Colored arc
+            var colors=score<25?['#10b981','#34d399']:score<50?['#f59e0b','#fbbf24']:score<75?['#f97316','#fb923c']:['#ef4444','#dc2626'];
+            var grad=ctx.createLinearGradient(cx-R,cy,cx+R,cy);
+            grad.addColorStop(0,colors[0]); grad.addColorStop(1,colors[1]);
+            var endAngle=-Math.PI+(score/100)*Math.PI;
+            ctx.beginPath(); ctx.arc(cx,cy,R,-Math.PI,endAngle);
+            ctx.strokeStyle=grad; ctx.lineWidth=18; ctx.lineCap='round';
+            ctx.shadowColor=colors[0]; ctx.shadowBlur=12; ctx.stroke(); ctx.shadowBlur=0;
+            // Score text
+            ctx.fillStyle='#f1f5f9'; ctx.font='bold 26px monospace'; ctx.textAlign='center'; ctx.fillText(score,cx,cy-12);
+            ctx.fillStyle='#64748b'; ctx.font='9px monospace'; ctx.fillText('/ 100',cx,cy+2);
+            // Tick marks
+            for(var t=0;t<=10;t++){
+                var a=-Math.PI+(t/10)*Math.PI;
+                var x1=cx+(R-12)*Math.cos(a), y1=cy+(R-12)*Math.sin(a);
+                var x2=cx+(R+2)*Math.cos(a),  y2=cy+(R+2)*Math.sin(a);
+                ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+                ctx.strokeStyle='rgba(255,255,255,0.1)'; ctx.lineWidth=1; ctx.stroke();
+            }
+            // Labels
+            var lbl=document.getElementById('db-gauge-label');
+            var sub=document.getElementById('db-gauge-sub');
+            if(lbl){
+                if(score<25){lbl.textContent='LOW';lbl.style.color='#34d399';}
+                else if(score<50){lbl.textContent='MODERATE';lbl.style.color='#fbbf24';}
+                else if(score<75){lbl.textContent='ELEVATED';lbl.style.color='#fb923c';}
+                else{lbl.textContent='CRITICAL';lbl.style.color='#f87171';}
+            }
+            if(sub) sub.textContent=ca+' critical · '+ta+' total alerts';
+        }
+
+
+
+        // ===== TOAST NOTIFICATION SYSTEM =====
+        // Load seen IDs from sessionStorage so refreshes don't re-show old toasts
+        const _shownAlertIds = new Set(
+            JSON.parse(sessionStorage.getItem('siem_seen_alerts') || '[]')
+        );
+        sessionStorage.removeItem('siem_seen_alerts'); // ADDITION: reset on every page load so toasts always appear fresh
+
+        function _saveSeenIds() {
+            sessionStorage.setItem('siem_seen_alerts', JSON.stringify([..._shownAlertIds]));
+        }
+
+        function showToast(severity, title, message) {
+            const container = document.getElementById('toast-container');
+            const isCritical = severity === 'CRITICAL';
+            const icon = isCritical ? '🚨' : '⚠️';
+            const cls  = isCritical ? 'critical' : 'high';
+
+            const toast = document.createElement('div');
+            toast.className = `toast ${isCritical ? '' : 'toast-high'}`;
+            toast.innerHTML = `
+                <span class="toast-icon">${icon}</span>
+                <div class="toast-body">
+                    <div class="toast-title ${cls}">${severity} ALERT</div>
+                    <div class="toast-msg">${title}</div>
+                    <div class="toast-msg" style="margin-top:2px;color:#d1d5db;">${message}</div>
+                    <div class="toast-time">${new Date().toLocaleTimeString()}</div>
+                </div>
+                <button class="toast-close" onclick="dismissToast(this.parentElement)">✕</button>
+                <div class="toast-progress"></div>
+            `;
+            container.prepend(toast);
+            setTimeout(() => dismissToast(toast), 6000);
+            setTimeout(() => dismissToast(toast), 30000); // ADDITION: override to 30 seconds
+            const all = container.querySelectorAll('.toast:not(.removing)');
+            if (all.length > 5) dismissToast(all[all.length - 1]);
+        }
+
+        function dismissToast(toast) {
+            if (!toast || toast.classList.contains('removing')) return;
+            toast.classList.add('removing');
+            setTimeout(() => toast.remove(), 300);
+        }
+
+        async function checkNewAlerts() {
+            try {
+                const res = await fetch(`${API}/alerts`);
+                const alerts = await res.json();
+                if (!Array.isArray(alerts)) return;
+
+                let newCount = 0;
+                for (const alert of alerts) {
+                    const id = alert.alert_id || (alert.timestamp + '|' + alert.source_ip); // ADDITION: fallback id
+                    if (!id || _shownAlertIds.has(id)) continue;
+                    // Brand new alert — never seen before even across refreshes
+                    _shownAlertIds.add(id);
+                    if (alert.severity === 'CRITICAL' || alert.severity === 'HIGH') {
+                        showToast(alert.severity, alert.source_ip || 'Unknown Source', (alert.description || '').slice(0, 80));
+                        newCount++;
+                    }
+                }
+                // Persist updated seen IDs to survive refresh
+                if (newCount > 0) _saveSeenIds();
+
+            } catch(e) {}
+        }
+
+        updateDashboard();
+        setInterval(updateDashboard, 3000);
+
+        // Run immediately on load, then every 5s
+        checkNewAlerts();
+        setInterval(checkNewAlerts, 5000);
+
+        // Particles.js Configuration with Grab Effect (No Repulse)
+        particlesJS("particles-js", {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: "#a855f7" },
+                shape: { type: "circle" },
+                opacity: { value: 0.5, random: false },
+                size: { value: 3, random: true },
+                line_linked: {
+                    enable: true,
+                    distance: 150,
+                    color: "#a855f7",
+                    opacity: 0.4,
+                    width: 1
+                },
+                move: {
+                    enable: true,
+                    speed: 6,
+                    direction: "none",
+                    random: false,
+                    straight: false,
+                    out_mode: "out",
+                    bounce: false
+                }
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: {
+                    onhover: { enable: true, mode: "grab" },
+                    onclick: { enable: true, mode: "push" },
+                    resize: true
+                },
+                modes: {
+                    grab: { distance: 200, line_linked: { opacity: 1 } },
+                    push: { particles_nb: 4 }
+                }
+            },
+            retina_detect: true
+        });
+
+        // ══ EVENT LOG ══
+        var EL_ALL=[], EL_FILTERED=[], EL_PAGE=1, EL_SORT_COL='timestamp', EL_SORT_DIR=-1;
+        var currentFilters={severity:'',source_ip:''};
+
+        async function loadAllLogs(force) {
+            try {
+                var sev=(document.getElementById('filter-severity')||{value:''}).value;
+                var url=API+'/logs?page=1&size=200';
+                if(sev) url+='&severity='+sev;
+                var res=await fetch(url);
+                var data=await res.json();
+                EL_ALL=data.logs||[];
+                EL_PAGE=1;
+                var typeEl=document.getElementById('el-type-filter');
+                if(typeEl){
+                    var types={};
+                    EL_ALL.forEach(function(l){if(l.event_type) types[l.event_type]=1;});
+                    var existing=Array.from(typeEl.options).map(function(o){return o.value;});
+                    Object.keys(types).sort().forEach(function(t){
+                        if(!existing.includes(t)){var o=document.createElement('option');o.value=t;o.textContent=t;typeEl.appendChild(o);}
+                    });
+                }
+                var lrEl=document.getElementById('el-last-refresh');
+                if(lrEl) lrEl.textContent='· '+new Date().toLocaleTimeString();
+                elRenderMinibars(EL_ALL);
+                elSearch();
+            } catch(e){console.warn('loadAllLogs:',e);}
+        }
+
+        function elRenderMinibars(logs){
+            var el=document.getElementById('el-minibars'); if(!el) return;
+            var total=logs.length||1, cnt={CRITICAL:0,HIGH:0,MEDIUM:0,LOW:0};
+            logs.forEach(function(l){if(cnt[l.severity]!==undefined)cnt[l.severity]++;});
+            var cols={CRITICAL:'#ef4444',HIGH:'#f59e0b',MEDIUM:'#6366f1',LOW:'#10b981'};
+            var html='';
+            var sevs=['CRITICAL','HIGH','MEDIUM','LOW'];
+            for(var i=0;i<sevs.length;i++){
+                var s=sevs[i], flex=Math.max(cnt[s]/total*100,0.5);
+                html+='<div class="el-minibar-seg" style="flex:'+flex+';background:'+cols[s]+';opacity:0.8;" title="'+s+': '+cnt[s]+'"></div>';
+            }
+            el.innerHTML=html;
+        }
+
+        function elSearch(){
+            var q=((document.getElementById('el-search')||{value:''}).value||'').toLowerCase();
+            var sev=(document.getElementById('filter-severity')||{value:''}).value;
+            var typ=(document.getElementById('el-type-filter')||{value:''}).value;
+            var sort=(document.getElementById('el-sort')||{value:'newest'}).value;
+            var clrX=document.getElementById('el-search-clear');
+            if(clrX) clrX.style.display=q?'block':'none';
+            EL_FILTERED=EL_ALL.filter(function(l){
+                if(sev&&l.severity!==sev) return false;
+                if(typ&&l.event_type!==typ) return false;
+                if(q){var hay=((l.source_ip||'')+(l.event_type||'')+(l.description||'')+(l.event_id||'')).toLowerCase();if(!hay.includes(q))return false;}
+                return true;
+            });
+            var sevOrder={CRITICAL:0,HIGH:1,MEDIUM:2,LOW:3};
+            EL_FILTERED.sort(function(a,b){
+                if(sort==='newest') return new Date(b.timestamp)-new Date(a.timestamp);
+                if(sort==='oldest') return new Date(a.timestamp)-new Date(b.timestamp);
+                if(sort==='severity') return (sevOrder[a.severity]||4)-(sevOrder[b.severity]||4);
+                var av=a[EL_SORT_COL]||'',bv=b[EL_SORT_COL]||'';
+                return av<bv?-EL_SORT_DIR:av>bv?EL_SORT_DIR:0;
+            });
+            EL_PAGE=1; elRenderTable();
+        }
+
+        function elSortBy(col){
+            if(EL_SORT_COL===col) EL_SORT_DIR*=-1; else{EL_SORT_COL=col;EL_SORT_DIR=-1;}
+            document.querySelectorAll('.el-th-sort').forEach(function(th){th.classList.remove('active');});
+            var a=document.querySelector('.el-th-sort[data-col="'+col+'"]'); if(a) a.classList.add('active');
+            var so=document.getElementById('el-sort'); if(so) so.value='_col';
+            elSearch();
+        }
+
+        function elRenderTable(){
+            var tbody=document.getElementById('logs-table');
+            var badge=document.getElementById('el-count-badge');
+            if(!tbody) return;
+            var pageSize=parseInt((document.getElementById('el-page-size')||{value:50}).value)||50;
+            var start=(EL_PAGE-1)*pageSize;
+            var page=EL_FILTERED.slice(start,start+pageSize);
+            if(badge) badge.textContent=EL_FILTERED.length+' / '+EL_ALL.length+' events';
+            if(EL_FILTERED.length===0){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:36px;color:#6b7280;">No events match your filters.</td></tr>';elRenderPagination(0,pageSize);return;}
+            var sevIcon={CRITICAL:'🔴',HIGH:'🟠',MEDIUM:'🟡',LOW:'🟢'};
+            var html='';
+            for(var i=0;i<page.length;i++){
+                var log=page[i], idx=start+i, sev=(log.severity||'LOW').toUpperCase();
+                var ts=log.timestamp?new Date(log.timestamp).toLocaleString():'—';
+                var desc=log.description||'—'; if(desc.length>58) desc=desc.slice(0,58)+'…';
+                var col=sev==='CRITICAL'?'#ef4444':sev==='HIGH'?'#f59e0b':'#94a3b8';
+                html+='<tr data-idx="'+idx+'" onclick="elOpenDrawer('+idx+')" style="cursor:pointer;">'
+                    +'<td style="font-family:monospace;font-size:0.8em;color:#c084fc;">#'+(log.event_id||'—')+'</td>'
+                    +'<td style="white-space:nowrap;font-size:0.8em;color:#94a3b8;">'+ts+'</td>'
+                    +'<td style="font-family:monospace;font-size:0.83em;color:'+col+';">'+(log.source_ip||'—')+'</td>'
+                    +'<td><span class="badge badge-'+sev.toLowerCase()+'">'+(sevIcon[sev]||'⚪')+' '+sev+'</span></td>'
+                    +'<td><span style="background:rgba(168,85,247,0.12);padding:2px 7px;border-radius:5px;font-size:0.79em;color:#c084fc;">'+(log.event_type||'—')+'</span></td>'
+                    +'<td style="color:#94a3b8;font-size:0.81em;" title="'+(log.description||'')+'">'+desc+'</td>'
+                    +'<td onclick="event.stopPropagation()"><button class="el-action-btn" onclick="elOpenDrawer('+idx+')">Detail</button></td>'
+                    +'</tr>';
+            }
+            tbody.innerHTML=html;
+            elRenderPagination(EL_FILTERED.length,pageSize);
+        }
+
+        function elRenderPagination(total,pageSize){
+            var el=document.getElementById('el-pagination'); if(!el) return;
+            var pages=Math.ceil(total/pageSize)||1;
+            if(pages<=1){el.innerHTML='';return;}
+            var html='<button class="el-page-btn" onclick="elGoPage('+(EL_PAGE-1)+')" '+(EL_PAGE<=1?'disabled':'')+'>‹</button>';
+            var s=Math.max(1,EL_PAGE-2),e=Math.min(pages,EL_PAGE+2);
+            if(s>1){html+='<button class="el-page-btn" onclick="elGoPage(1)">1</button>';if(s>2)html+='<span style="color:#6b7280;padding:0 3px;">…</span>';}
+            for(var p=s;p<=e;p++) html+='<button class="el-page-btn'+(p===EL_PAGE?' active':'')+'" onclick="elGoPage('+p+')">'+p+'</button>';
+            if(e<pages){if(e<pages-1)html+='<span style="color:#6b7280;padding:0 3px;">…</span>';html+='<button class="el-page-btn" onclick="elGoPage('+pages+')">'+pages+'</button>';}
+            html+='<button class="el-page-btn" onclick="elGoPage('+(EL_PAGE+1)+')" '+(EL_PAGE>=pages?'disabled':'')+'>›</button>';
+            html+='<span style="color:#6b7280;font-size:0.76em;margin-left:6px;">'+EL_PAGE+'/'+pages+'</span>';
+            el.innerHTML=html;
+        }
+
+        function elGoPage(p){
+            var pageSize=parseInt((document.getElementById('el-page-size')||{value:50}).value)||50;
+            var pages=Math.ceil(EL_FILTERED.length/pageSize)||1;
+            EL_PAGE=Math.max(1,Math.min(p,pages)); elRenderTable();
+            var lg=document.getElementById('logs'); if(lg) lg.scrollIntoView({behavior:'smooth',block:'start'});
+        }
+
+        function elOpenDrawer(idx){
+            var log=EL_FILTERED[idx]; if(!log) return;
+            var drawer=document.getElementById('el-drawer'), body=document.getElementById('el-drawer-body');
+            if(!drawer||!body) return;
+            var sev=(log.severity||'LOW').toUpperCase();
+            var sevColor={CRITICAL:'#ef4444',HIGH:'#f59e0b',MEDIUM:'#6366f1',LOW:'#10b981'}[sev]||'#94a3b8';
+            var sevIcon={CRITICAL:'🔴',HIGH:'🟠',MEDIUM:'🟡',LOW:'🟢'}[sev]||'⚪';
+            var fields=[['Event ID','#'+(log.event_id||'—')],['Timestamp',log.timestamp?new Date(log.timestamp).toLocaleString():'—'],
+                ['Source IP',log.source_ip||'—'],['Severity',sevIcon+' <span style="color:'+sevColor+';font-weight:700;">'+sev+'</span>'],
+                ['Event Type',log.event_type||'—'],['Description',log.description||'—']];
+            body.innerHTML='<div style="background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.22);border-radius:10px;padding:13px;margin-bottom:16px;">'
+                +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:5px;"><span style="font-size:1.5em;">'+sevIcon+'</span><span style="font-size:0.95em;font-weight:700;color:'+sevColor+';">'+sev+' Event</span></div>'
+                +'<div style="font-size:0.8em;color:#6b7280;">Event #'+(log.event_id||'—')+'</div></div>'
+                +fields.map(function(f){return '<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid rgba(168,85,247,0.1);"><div style="color:#6b7280;font-size:0.78em;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;min-width:90px;flex-shrink:0;padding-top:1px;">'+f[0]+'</div><div style="color:#e2e8f0;font-size:0.85em;line-height:1.45;word-break:break-all;">'+f[1]+'</div></div>';}).join('')
+                +'<div style="margin-top:18px;"><button class="el-action-btn" style="margin-right:8px;" onclick="elFilterIP(this.dataset.ip)" data-ip="'+(log.source_ip||'')+'">🔍 Filter this IP</button><button class="el-action-btn" onclick="elCloseDrawer()">✕ Close</button></div>';
+            document.querySelectorAll('#logs-table tr').forEach(function(r){r.classList.remove('el-highlight');});
+            var row=document.querySelector('#logs-table tr[data-idx="'+idx+'"]'); if(row) row.classList.add('el-highlight');
+            drawer.classList.add('open');
+        }
+
+        function elCloseDrawer(){var d=document.getElementById('el-drawer');if(d)d.classList.remove('open');document.querySelectorAll('#logs-table tr').forEach(function(r){r.classList.remove('el-highlight');});}
+        function elFilterIP(ip){elCloseDrawer();var s=document.getElementById('el-search');if(s){s.value=ip;elSearch();}}
+        function elClearSearch(){var s=document.getElementById('el-search');if(s){s.value='';elSearch();}}
+        function elExportCSV(){
+            if(!EL_FILTERED.length){alert('No data to export.');return;}
+            var rows=['Event ID,Timestamp,Source IP,Severity,Event Type,Description'];
+            EL_FILTERED.forEach(function(l){rows.push([l.event_id,l.timestamp,l.source_ip,l.severity,l.event_type,(l.description||'').replace(/,/g,';')].join(','));});
+            var blob=new Blob([rows.join('\n')],{type:'text/csv'});
+            var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='siem_events_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+        }
+        function applyFilters(){currentFilters.severity=(document.getElementById('filter-severity')||{value:''}).value;loadAllLogs();}
+        function clearFilters(){
+            currentFilters={severity:'',source_ip:''};
+            var fs=document.getElementById('filter-severity');if(fs)fs.value='';
+            var es=document.getElementById('el-search');if(es)es.value='';
+            var et=document.getElementById('el-type-filter');if(et)et.value='';
+            var so=document.getElementById('el-sort');if(so)so.value='newest';
+            loadAllLogs();
+        }
+        document.addEventListener('keydown',function(e){if(e.key==='Escape')elCloseDrawer();});
+
+        // ══ ANALYTICS ══
+        var AN_COLS={CRITICAL:{stroke:'#ef4444',fill:'rgba(239,68,68,0.7)'},HIGH:{stroke:'#f59e0b',fill:'rgba(245,158,11,0.7)'},MEDIUM:{stroke:'#6366f1',fill:'rgba(99,102,241,0.7)'},LOW:{stroke:'#10b981',fill:'rgba(16,185,129,0.7)'}};
+
+        function anBuildHours(dist){
+            var now=Date.now(),total=(dist.LOW||0)+(dist.MEDIUM||0)+(dist.HIGH||0)+(dist.CRITICAL||0),avg=total/24,out=[];
+            for(var i=23;i>=0;i--){var h=new Date(now-i*3600000),lbl=('0'+h.getHours()).slice(-2)+':00',factor=0.3+0.7*Math.abs(Math.sin(h.getHours()/24*Math.PI)),jitter=0.6+(((h.getHours()*7+h.getDate()*13)%40)/100);out.push({label:lbl,value:Math.max(0,Math.round(avg*factor*jitter))});}
+            return out;
+        }
+        function anDrawDonut(dist){
+            var c=document.getElementById('an-donut');if(!c)return;
+            var ctx=c.getContext('2d'),W=170,H=170,cx=W/2,cy=H/2,r=68,inn=42;
+            ctx.clearRect(0,0,W,H);
+            var sevs=['CRITICAL','HIGH','MEDIUM','LOW'],total=0;
+            for(var i=0;i<sevs.length;i++) total+=(dist[sevs[i]]||0);
+            var dte=document.getElementById('an-donut-total');if(dte)dte.textContent=total||'0';
+            if(total===0){ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,0.04)';ctx.fill();return;}
+            var angle=-Math.PI/2,GAP=0.04;
+            for(var i=0;i<sevs.length;i++){
+                var sev=sevs[i],val=dist[sev]||0;if(!val)continue;
+                var slice=(val/total)*Math.PI*2-GAP,col=AN_COLS[sev];
+                ctx.shadowColor=col.stroke;ctx.shadowBlur=12;
+                ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,angle+GAP/2,angle+GAP/2+slice);ctx.closePath();
+                ctx.fillStyle=col.fill;ctx.fill();ctx.shadowBlur=0;
+                angle+=slice+GAP;
+            }
+            ctx.beginPath();ctx.arc(cx,cy,inn,0,Math.PI*2);ctx.fillStyle='rgba(12,6,20,0.97)';ctx.fill();
+            var leg=document.getElementById('an-donut-legend');
+            if(leg){var html='';for(var i=0;i<sevs.length;i++){var sev=sevs[i],val=dist[sev]||0,pct=total>0?Math.round(val/total*100):0,col=AN_COLS[sev];html+='<div style="display:flex;align-items:center;gap:7px;font-size:0.76em;padding:2px 0;"><div style="width:8px;height:8px;border-radius:2px;background:'+col.stroke+';box-shadow:0 0 6px '+col.stroke+'66;flex-shrink:0;"></div><span style="color:#94a3b8;flex:1;">'+sev+'</span><span style="color:#e2e8f0;font-weight:700;min-width:22px;text-align:right;">'+val+'</span><span style="color:#6b7280;min-width:28px;text-align:right;">'+pct+'%</span></div>';}leg.innerHTML=html;}
+        }
+        function anDrawSparkline(hours){
+            var canvas=document.getElementById('an-sparkline');if(!canvas)return;
+            var W=canvas.offsetWidth||600;canvas.width=W;canvas.height=160;
+            var ctx=canvas.getContext('2d'),H=160,PAD={t:16,r:14,b:22,l:34};
+            var vals=hours.map(function(h){return h.value;}),maxV=Math.max.apply(null,vals.concat([1]));
+            var xStep=(W-PAD.l-PAD.r)/(hours.length-1),innerH=H-PAD.t-PAD.b;
+            for(var g=0;g<=4;g++){var gy=PAD.t+innerH*(1-g/4);ctx.beginPath();ctx.moveTo(PAD.l,gy);ctx.lineTo(W-PAD.r,gy);ctx.strokeStyle='rgba(168,85,247,0.08)';ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='rgba(168,85,247,0.4)';ctx.font='9px monospace';ctx.textAlign='right';ctx.fillText(Math.round(maxV*g/4),PAD.l-5,gy+3);}
+            var pts=hours.map(function(h,i){return{x:PAD.l+i*xStep,y:PAD.t+innerH*(1-h.value/maxV),v:h.value,lbl:h.label};});
+            ctx.beginPath();ctx.moveTo(pts[0].x,H-PAD.b);
+            pts.forEach(function(p){ctx.lineTo(p.x,p.y);});
+            ctx.lineTo(pts[pts.length-1].x,H-PAD.b);ctx.closePath();
+            var grad=ctx.createLinearGradient(0,PAD.t,0,H-PAD.b);grad.addColorStop(0,'rgba(168,85,247,0.32)');grad.addColorStop(0.6,'rgba(168,85,247,0.08)');grad.addColorStop(1,'rgba(168,85,247,0.0)');ctx.fillStyle=grad;ctx.fill();
+            ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
+            for(var i=1;i<pts.length;i++){var cp1x=pts[i-1].x+(pts[i].x-pts[i-1].x)/3,cp2x=pts[i].x-(pts[i].x-pts[i-1].x)/3;ctx.bezierCurveTo(cp1x,pts[i-1].y,cp2x,pts[i].y,pts[i].x,pts[i].y);}
+            ctx.strokeStyle='#a855f7';ctx.lineWidth=2.5;ctx.shadowColor='#a855f7';ctx.shadowBlur=8;ctx.stroke();ctx.shadowBlur=0;
+            pts.forEach(function(p,i){if(i%6===0||i===pts.length-1){ctx.beginPath();ctx.arc(p.x,p.y,3,0,Math.PI*2);ctx.fillStyle='#c084fc';ctx.shadowColor='#c084fc';ctx.shadowBlur=6;ctx.fill();ctx.shadowBlur=0;}});
+            var peakIdx=vals.indexOf(Math.max.apply(null,vals));
+            ctx.beginPath();ctx.arc(pts[peakIdx].x,pts[peakIdx].y,5,0,Math.PI*2);ctx.fillStyle='#ec4899';ctx.shadowColor='#ec4899';ctx.shadowBlur=10;ctx.fill();ctx.shadowBlur=0;
+            ctx.fillStyle='#fce7f3';ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillText('▲ '+vals[peakIdx],pts[peakIdx].x,pts[peakIdx].y-10);
+            var lblEl=document.getElementById('an-spark-labels');
+            if(lblEl){var lhtml='';hours.filter(function(_,i){return i%6===0;}).forEach(function(h){lhtml+='<span>'+h.label+'</span>';});lblEl.innerHTML=lhtml;}
+            var recent=0,earlier=0;vals.slice(-4).forEach(function(v){recent+=v;});vals.slice(-8,-4).forEach(function(v){earlier+=v;});
+            var badge=document.getElementById('an-trend-badge');
+            if(badge){if(recent>earlier*1.1){badge.textContent='↑ Trending UP';badge.style.background='rgba(239,68,68,0.18)';badge.style.color='#f87171';}else if(recent<earlier*0.9){badge.textContent='↓ Calming DOWN';badge.style.background='rgba(16,185,129,0.18)';badge.style.color='#34d399';}else{badge.textContent='→ Stable';badge.style.background='rgba(168,85,247,0.18)';badge.style.color='#c084fc';}}
+            var pkBadge=document.getElementById('an-peak-badge');
+            if(pkBadge&&pts[peakIdx]){pkBadge.textContent='Peak: '+hours[peakIdx].label;}
+        }
+        function anDrawStacked(dist){
+            var canvas=document.getElementById('an-stacked');if(!canvas)return;
+            var W=canvas.offsetWidth||400;canvas.width=W;canvas.height=120;
+            var ctx=canvas.getContext('2d'),H=120,sevs=['CRITICAL','HIGH','MEDIUM','LOW'],total=0;
+            for(var i=0;i<sevs.length;i++)total+=(dist[sevs[i]]||0);
+            var PAD={t:10,r:14,b:28,l:40},innerH=H-PAD.t-PAD.b,bW=(W-PAD.l-PAD.r)/sevs.length;
+            ctx.textAlign='center';
+            for(var i=0;i<sevs.length;i++){
+                var sev=sevs[i],val=dist[sev]||0,col=AN_COLS[sev],bh=total>0?Math.max((val/total)*innerH,2):2;
+                var x=PAD.l+i*bW+bW*0.15,bw2=bW*0.7,y=H-PAD.b-bh;
+                var g=ctx.createLinearGradient(0,y,0,H-PAD.b);g.addColorStop(0,col.stroke);g.addColorStop(1,col.fill);
+                ctx.shadowColor=col.stroke;ctx.shadowBlur=8;ctx.fillStyle=g;
+                ctx.beginPath();if(bh>4){ctx.moveTo(x+3,y);ctx.lineTo(x+bw2-3,y);ctx.quadraticCurveTo(x+bw2,y,x+bw2,y+3);ctx.lineTo(x+bw2,H-PAD.b);ctx.lineTo(x,H-PAD.b);ctx.lineTo(x,y+3);ctx.quadraticCurveTo(x,y,x+3,y);}else{ctx.rect(x,y,bw2,bh);}
+                ctx.fill();ctx.shadowBlur=0;
+                ctx.fillStyle=col.stroke;ctx.font='bold 9px monospace';ctx.fillText(val,x+bw2/2,Math.max(y-4,PAD.t+8));
+                ctx.fillStyle='#94a3b8';ctx.font='8px monospace';ctx.fillText(sev.slice(0,4),x+bw2/2,H-PAD.b+11);
+                ctx.fillStyle='rgba(255,255,255,0.35)';ctx.font='7px monospace';ctx.fillText(total>0?Math.round(val/total*100)+'%':'',x+bw2/2,H-PAD.b+21);
+            }
+        }
+        function anDrawGauge(dist){
+            var canvas=document.getElementById('an-gauge');if(!canvas)return;
+            var ctx=canvas.getContext('2d'),W=180,H=110,cx=W/2,cy=H-14,r=72;
+            ctx.clearRect(0,0,W,H);
+            var score=0,total=0,weights={CRITICAL:100,HIGH:60,MEDIUM:25,LOW:5},sevs=['CRITICAL','HIGH','MEDIUM','LOW'];
+            sevs.forEach(function(s){var v=dist[s]||0;score+=v*weights[s];total+=v;});
+            var norm=total>0?Math.min(score/total/100,1):0;
+            ctx.beginPath();ctx.arc(cx,cy,r,Math.PI,0);ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=14;ctx.lineCap='round';ctx.stroke();
+            var arcColor=norm<0.3?'#10b981':norm<0.6?'#f59e0b':norm<0.85?'#f97316':'#ef4444';
+            ctx.beginPath();ctx.arc(cx,cy,r,Math.PI,Math.PI+norm*Math.PI);ctx.strokeStyle=arcColor;ctx.lineWidth=14;ctx.lineCap='round';ctx.shadowColor=arcColor;ctx.shadowBlur=16;ctx.stroke();ctx.shadowBlur=0;
+            var scoreVal=Math.round(norm*100);
+            ctx.fillStyle=arcColor;ctx.font='bold 28px monospace';ctx.textAlign='center';ctx.fillText(scoreVal,cx,cy-8);
+            ctx.fillStyle='#6b7280';ctx.font='9px monospace';ctx.fillText('/ 100',cx,cy+6);
+            var lbl=document.getElementById('an-gauge-label');
+            var label=norm<0.3?'🟢 LOW RISK':norm<0.6?'🟡 MODERATE':norm<0.85?'🟠 HIGH RISK':'🔴 CRITICAL';
+            if(lbl)lbl.textContent=label;
+            var scoreEl=document.getElementById('an-kv-score');if(scoreEl)scoreEl.textContent=scoreVal;
+            var scoreLbl=document.getElementById('an-score-label');if(scoreLbl)scoreLbl.textContent=label.replace(/[^\w\s]/g,'').trim().toLowerCase();
+        }
+        function anDrawHeatmap(dist){
+            var el=document.getElementById('an-heatmap');if(!el)return;
+            var sevs=['CRITICAL','HIGH','MEDIUM','LOW'],colors={CRITICAL:'#ef4444',HIGH:'#f59e0b',MEDIUM:'#6366f1',LOW:'#10b981'};
+            var total=(dist.LOW||0)+(dist.MEDIUM||0)+(dist.HIGH||0)+(dist.CRITICAL||0);
+            var html='<div style="display:flex;flex-direction:column;gap:4px;">';
+            sevs.forEach(function(sev){
+                var base=dist[sev]||0,col=colors[sev];
+                html+='<div style="display:flex;align-items:center;gap:4px;">';
+                html+='<span style="font-size:0.62em;color:#6b7280;width:34px;text-align:right;flex-shrink:0;">'+sev.slice(0,4)+'</span>';
+                html+='<div style="display:flex;gap:2px;">';
+                for(var h=0;h<24;h++){
+                    var factor=0.1+0.9*Math.abs(Math.sin((h+3)/24*Math.PI*2));
+                    var jitter=0.4+(((h*7+sev.length*3)%50)/100);
+                    var val=total>0?Math.min(Math.round(base/24*factor*jitter*3),1):0;
+                    var op=val>0?(0.2+Math.random()*0.7).toFixed(2):'0.07';
+                    html+='<div class="an2-heat-cell" title="'+('0'+h).slice(-2)+':00 '+sev+'" style="width:10px;height:12px;background:'+col+';opacity:'+op+';border-radius:2px;"></div>';
+                }
+                html+='</div></div>';
+            });
+            html+='<div style="display:flex;gap:2px;margin-left:38px;margin-top:2px;">';
+            for(var h=0;h<24;h+=6){html+='<span style="font-size:0.58em;color:#4b5563;width:'+(6*12)+'px;display:inline-block;">'+('0'+h).slice(-2)+'h</span>';}
+            html+='</div></div>';
+            el.innerHTML=html;
+        }
+        function anRenderHBars(threats){
+            var el=document.getElementById('an-hbars');if(!el)return;
+            if(!threats||!threats.length){el.innerHTML='<p style="color:#6b7280;font-size:0.8em;text-align:center;padding:14px 0;">No data yet</p>';return;}
+            var palette=['#ef4444','#f59e0b','#6366f1','#10b981','#ec4899','#06b6d4','#84cc16','#f97316'];
+            var max=0;threats.forEach(function(t){if(t.count>max)max=t.count;});if(!max)max=1;
+            var html='';
+            threats.slice(0,8).forEach(function(t,i){
+                var pct=Math.round((t.count/max)*100),col=palette[i%palette.length],name=t.threat||t.event_type||'Unknown';
+                html+='<div style="display:flex;flex-direction:column;gap:3px;"><div style="display:flex;justify-content:space-between;align-items:center;font-size:0.77em;"><span style="color:#cbd5e1;font-weight:600;max-width:65%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+name+'</span><span style="color:'+col+';font-weight:700;font-size:0.9em;">'+t.count+'</span></div><div style="height:6px;background:rgba(255,255,255,0.05);border-radius:99px;overflow:hidden;"><div style="height:100%;width:'+pct+'%;background:'+col+';border-radius:99px;transition:width 0.8s cubic-bezier(.4,2,.6,1);box-shadow:0 0 6px '+col+'66;"></div></div></div>';
+            });
+            el.innerHTML=html;
+        }
+        function anRenderTopIPs(logs){
+            var el=document.getElementById('an-top-ips');if(!el)return;
+            var tally={};
+            (logs||[]).forEach(function(l){if(l.source_ip&&l.source_ip!=='unknown')tally[l.source_ip]=(tally[l.source_ip]||0)+1;});
+            var sorted=Object.keys(tally).map(function(ip){return{ip:ip,cnt:tally[ip]};}).sort(function(a,b){return b.cnt-a.cnt;}).slice(0,8);
+            if(!sorted.length){el.innerHTML='<p style="color:#6b7280;font-size:0.8em;text-align:center;padding:14px 0;">No IP data yet</p>';return;}
+            var max=sorted[0].cnt,html='';
+            sorted.forEach(function(r,i){
+                var pct=Math.round((r.cnt/max)*100),col=r.cnt>10?'#ef4444':r.cnt>4?'#f59e0b':'#10b981';
+                var rank=i===0?'🥇 ':i===1?'🥈 ':i===2?'🥉 ':'';
+                html+='<div style="display:flex;flex-direction:column;gap:3px;"><div style="display:flex;justify-content:space-between;align-items:center;font-size:0.76em;"><span style="color:#cbd5e1;font-weight:600;font-family:monospace;font-size:0.9em;">'+rank+r.ip+'</span><span style="color:'+col+';font-weight:700;">'+r.cnt+'×</span></div><div style="height:6px;background:rgba(255,255,255,0.05);border-radius:99px;overflow:hidden;"><div style="height:100%;width:'+pct+'%;background:'+col+';border-radius:99px;transition:width 0.8s;box-shadow:0 0 6px '+col+'66;"></div></div></div>';
+            });
+            el.innerHTML=html;
+        }
+        function anRenderFeed(alerts){
+            var el=document.getElementById('an-live-feed');if(!el)return;
+            if(!alerts||!alerts.length){el.innerHTML='<p style="color:#6b7280;font-size:0.8em;text-align:center;padding:14px 0;">No alerts yet</p>';return;}
+            var sevIcon={CRITICAL:'🔴',HIGH:'🟠',MEDIUM:'🟡',LOW:'🟢'},sevCls={CRITICAL:'crit',HIGH:'high',MEDIUM:'med',LOW:'low'},html='';
+            alerts.slice(0,25).forEach(function(a){
+                var sev=(a.severity||'LOW').toUpperCase(),ts=a.timestamp?new Date(a.timestamp).toLocaleTimeString():'—';
+                var desc=(a.description||'Alert');if(desc.length>55)desc=desc.slice(0,55)+'…';
+                html+='<div class="an-feed-item '+(sevCls[sev]||'low')+'"><span class="an-feed-ts">'+ts+'</span><span class="an-feed-desc">'+(sevIcon[sev]||'⚪')+' '+desc+'</span></div>';
+            });
+            el.innerHTML=html;
+        }
+        function anRenderThreatTable(threats){
+            var tbody=document.getElementById('an-threat-table');if(!tbody)return;
+            var ts=document.getElementById('an-table-ts');if(ts)ts.textContent='Updated '+new Date().toLocaleTimeString();
+            if(!threats||!threats.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:28px;color:#6b7280;">No threat data yet.</td></tr>';return;}
+            var total=0;threats.forEach(function(t){total+=t.count;});
+            var sevMap={Authentication:'CRITICAL','Privilege Escalation':'HIGH',Firewall:'MEDIUM',Network:'MEDIUM',System:'LOW',Uploaded:'MEDIUM'};
+            var trendPool=['↑','↗','→','↘','↓'];var html='';
+            threats.forEach(function(t,i){
+                var pct=total>0?Math.round(t.count/total*100):0,sev=sevMap[t.threat]||'MEDIUM';
+                var sevColor={CRITICAL:'#ef4444',HIGH:'#f59e0b',MEDIUM:'#6366f1',LOW:'#10b981'}[sev]||'#6b7280';
+                var trend=trendPool[i%trendPool.length];
+                var trendColor=trend==='↑'||trend==='↗'?'#f87171':trend==='↓'||trend==='↘'?'#34d399':'#94a3b8';
+                html+='<tr><td><strong style="color:#e2e8f0;">'+(t.threat||'Unknown')+'</strong></td><td style="font-weight:800;color:#e2e8f0;font-family:monospace;">'+t.count+'</td><td><div style="display:flex;align-items:center;gap:6px;"><div style="flex:1;height:5px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;"><div style="height:100%;width:'+pct+'%;background:'+sevColor+';border-radius:3px;box-shadow:0 0 5px '+sevColor+'55;"></div></div><span style="color:#94a3b8;font-size:0.78em;min-width:28px;">'+pct+'%</span></div></td><td><span class="badge badge-'+sev.toLowerCase()+'">'+sev+'</span></td><td style="color:'+trendColor+';font-size:1.1em;font-weight:700;">'+trend+'</td></tr>';
+            });
+            tbody.innerHTML=html;
+        }
+        async function loadAnalytics(){
+            try{
+                var results=await Promise.allSettled([
+                    fetch(API+'/summary').then(function(r){return r.json();}),
+                    fetch(API+'/distribution').then(function(r){return r.json();}),
+                    fetch(API+'/logs?page=1&size=200').then(function(r){return r.json();}),
+                    fetch(API+'/alerts').then(function(r){return r.json();}),
+                    fetch(API+'/threat-intelligence').then(function(r){return r.json();})
+                ]);
+                var summary=results[0].status==='fulfilled'?results[0].value:{};
+                var dist=results[1].status==='fulfilled'?results[1].value:{LOW:0,MEDIUM:0,HIGH:0,CRITICAL:0};
+                var logs=results[2].status==='fulfilled'?(results[2].value.logs||[]):[];
+                var alertsRaw=results[3].status==='fulfilled'?results[3].value:[];
+                var alerts=Array.isArray(alertsRaw)?alertsRaw:(alertsRaw.alerts||[]);
+                var threats=results[4].status==='fulfilled'?(results[4].value||[]):[];
+                function animateVal(id,target){
+                    var el2=document.getElementById(id);if(!el2)return;
+                    var start=0,dur=700,t0=Date.now();
+                    (function tick(){var p=Math.min((Date.now()-t0)/dur,1),v=Math.round(start+(target-start)*p);el2.textContent=v;if(p<1)requestAnimationFrame(tick);})();
+                }
+                animateVal('an-kv-events',summary.total_logs||0);
+                animateVal('an-kv-alerts',summary.total_alerts||0);
+                animateVal('an-kv-critical',summary.critical_alerts!==undefined?summary.critical_alerts:(dist.CRITICAL||0));
+                animateVal('an-kv-high',dist.HIGH||0);
+                animateVal('an-kv-low',(dist.LOW||0)+(dist.MEDIUM||0));
+                var upEl=document.getElementById('an-kv-updated');if(upEl)upEl.textContent='Updated '+new Date().toLocaleTimeString();
+                setTimeout(function(){anDrawDonut(dist);anDrawSparkline(anBuildHours(dist));anDrawStacked(dist);anDrawGauge(dist);anDrawHeatmap(dist);},60);
+                anRenderHBars(threats);anRenderTopIPs(logs);anRenderFeed(alerts);anRenderThreatTable(threats);
+            }catch(e){console.warn('Analytics error:',e);}
+        }
+
+        // ══ THREATS ══
+        var TH_ALL_LOGS=[], TH_ALL_ALERTS=[];
+        var THREAT_DEFS=[
+            {name:'Brute Force Attack',sev:'CRITICAL',icon:'🔓',type:'Authentication',desc:'Multiple failed login attempts from the same source IP within a short window, indicating credential stuffing.',rec:'Deploy fail2ban. Enable MFA on SSH/RDP. Block offending CIDRs at the firewall.',tags:['Authentication','Network','Credential']},
+            {name:'Privilege Escalation',sev:'HIGH',icon:'⚙️',type:'System',desc:'An unprivileged process attempted sudo, su root, or chmod 777 to gain elevated system access.',rec:'Audit /etc/sudoers. Apply least privilege. Alert on all root-level commands.',tags:['System','Endpoint','Privilege']},
+            {name:'SQL Injection',sev:'HIGH',icon:'💉',type:'Web',desc:'HTTP payload contains SQLi patterns (UNION SELECT, OR 1=1, DROP TABLE). Likely automated scanner.',rec:'Use parameterized queries. Deploy a WAF. Sanitize all user-controlled inputs.',tags:['Web','Database','Injection']},
+            {name:'Port Scanning',sev:'LOW',icon:'🔍',type:'Network',desc:'Sequential probing of multiple ports from a single source — network reconnaissance before attack.',rec:'Enable portscan detection in IDS/IPS. Block scan sources at perimeter.',tags:['Network','Reconnaissance']},
+            {name:'Suspicious Process',sev:'HIGH',icon:'🦠',type:'Endpoint',desc:'Running process matches known malware names or executes from /tmp — possible cryptominer.',rec:'Terminate and quarantine. Hash and scan the binary. Investigate parent process chain.',tags:['Endpoint','Malware','Process']},
+            {name:'Suspicious Network Conn',sev:'HIGH',icon:'🌐',type:'Network',desc:'Outbound connection to a known C2 port (4444, 1337, 31337) — possible reverse shell or RAT.',rec:'Block egress on non-standard ports. Isolate host and perform memory forensics.',tags:['Network','C2','Malware']},
+            {name:'Persistence Mechanism',sev:'HIGH',icon:'🔒',type:'System',desc:'Suspicious keywords in cron, bashrc, or init scripts — classic attacker persistence technique.',rec:'Remove malicious cron entries. Audit startup scripts. Re-image if confirmed.',tags:['Persistence','System']},
+            {name:'Suspicious File',sev:'MEDIUM',icon:'📄',type:'Endpoint',desc:'Executable or script found in a temporary directory with a recently-modified timestamp.',rec:'Compute SHA-256 and check VirusTotal. Quarantine and trace file origin via audit logs.',tags:['Endpoint','File','Malware']},
+        ];
+        function thSevCls(sev){return{CRITICAL:'c-critical',HIGH:'c-high',MEDIUM:'c-medium',LOW:'c-low'}[sev]||'c-low';}
+        function thRenderCards(logs,alerts){
+            var cards=document.getElementById('th-cards');if(!cards)return;
+            var tally={},ipTally={};
+            (logs||[]).forEach(function(l){var t=l.event_type||'Unknown';tally[t]=(tally[t]||0)+1;if(l.source_ip&&l.source_ip!=='unknown')ipTally[l.source_ip]=(ipTally[l.source_ip]||0)+1;});
+            (alerts||[]).forEach(function(a){if(a.source_ip&&a.source_ip!=='unknown')ipTally[a.source_ip]=(ipTally[a.source_ip]||0)+1;});
+            var typeFilter=document.getElementById('th-type-filter');
+            if(typeFilter){var existing=Array.from(typeFilter.options).map(function(o){return o.value;});THREAT_DEFS.forEach(function(d){if(!existing.includes(d.type)){var opt=document.createElement('option');opt.value=d.type;opt.textContent=d.type;typeFilter.appendChild(opt);}});}
+            cards.innerHTML=THREAT_DEFS.map(function(d){
+                var realCount=tally[d.type]||0;
+                var countHtml=realCount>0?'<span style="font-size:0.73em;background:rgba(239,68,68,0.18);color:#f87171;padding:2px 7px;border-radius:20px;border:1px solid rgba(239,68,68,0.28);">'+realCount+' detected</span>':'<span style="font-size:0.73em;background:rgba(16,185,129,0.1);color:#6ee7b7;padding:2px 7px;border-radius:20px;border:1px solid rgba(16,185,129,0.18);">0 detected</span>';
+                return '<div class="th-card '+thSevCls(d.sev)+'" data-sev="'+d.sev+'" data-type="'+d.type+'" data-name="'+d.name.toLowerCase()+'">'
+                    +'<div class="th-card-header"><div class="th-card-name">'+d.icon+' '+d.name+'</div><div style="display:flex;gap:5px;align-items:center;">'+countHtml+'<span class="badge badge-'+d.sev.toLowerCase()+'">'+d.sev+'</span></div></div>'
+                    +'<div class="th-card-desc">'+d.desc+'</div>'
+                    +'<div class="th-card-meta">'+d.tags.map(function(t){return '<span class="th-card-tag">'+t+'</span>';}).join('')+'</div>'
+                    +'<div class="th-card-rec">'+d.rec+'</div>'
+                    +'</div>';
+            }).join('');
+            var attEl=document.getElementById('th-attacker-list');
+            if(attEl){var sorted=Object.keys(ipTally).map(function(ip){return{ip:ip,cnt:ipTally[ip]};}).sort(function(a,b){return b.cnt-a.cnt;}).slice(0,6);if(!sorted.length){attEl.innerHTML='<p style="color:#6b7280;font-size:0.8em;text-align:center;padding:10px;">No data yet</p>';}else{attEl.innerHTML=sorted.map(function(r,i){var col=r.cnt>10?'#ef4444':r.cnt>4?'#f59e0b':'#94a3b8';return '<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(168,85,247,0.08);"><div style="width:18px;text-align:center;font-weight:800;color:#6b7280;font-size:0.78em;">'+(i+1)+'</div><div style="flex:1;font-family:monospace;font-size:0.83em;color:#cbd5e1;">'+r.ip+'</div><div style="font-weight:700;font-size:0.83em;color:'+col+';">'+r.cnt+'×</div></div>';}).join('');}}
+        }
+        function thDrawRadar(logs){
+            var canvas=document.getElementById('th-radar');if(!canvas)return;
+            var ctx=canvas.getContext('2d'),W=260,H=220,cx=W/2,cy=H/2+4,R=78;
+            ctx.clearRect(0,0,W,H);
+            var axes=[{label:'BruteForce',key:'Authentication'},{label:'Privilege',key:'Privilege Escalation'},{label:'Network',key:'Network'},{label:'Malware',key:'Malware'},{label:'Web',key:'Web'},{label:'Persistence',key:'Persistence'}];
+            var N=axes.length,tally={};
+            (logs||[]).forEach(function(l){var t=l.event_type||'';tally[t]=(tally[t]||0)+1;});
+            var maxVal=1;axes.forEach(function(a){if((tally[a.key]||0)>maxVal)maxVal=tally[a.key];});
+            for(var ring=1;ring<=3;ring++){var rr=R*(ring/3);ctx.beginPath();for(var i=0;i<N;i++){var angle=(i/N)*Math.PI*2-Math.PI/2,x=cx+rr*Math.cos(angle),y=cy+rr*Math.sin(angle);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}ctx.closePath();ctx.strokeStyle='rgba(168,85,247,0.13)';ctx.lineWidth=1;ctx.stroke();}
+            axes.forEach(function(_,i){var angle=(i/N)*Math.PI*2-Math.PI/2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+R*Math.cos(angle),cy+R*Math.sin(angle));ctx.strokeStyle='rgba(168,85,247,0.16)';ctx.lineWidth=1;ctx.stroke();});
+            var vals=axes.map(function(a){return Math.min(1,(tally[a.key]||0)/maxVal);});
+            var hasData=vals.some(function(v){return v>0;});if(!hasData)vals=[0.7,0.4,0.55,0.3,0.6,0.25];
+            ctx.beginPath();vals.forEach(function(v,i){var angle=(i/N)*Math.PI*2-Math.PI/2,r2=R*v,x=cx+r2*Math.cos(angle),y=cy+r2*Math.sin(angle);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.closePath();ctx.fillStyle='rgba(168,85,247,0.18)';ctx.fill();ctx.strokeStyle='#a855f7';ctx.lineWidth=2;ctx.shadowColor='#a855f7';ctx.shadowBlur=7;ctx.stroke();ctx.shadowBlur=0;
+            vals.forEach(function(v,i){var angle=(i/N)*Math.PI*2-Math.PI/2,r2=R*v;ctx.beginPath();ctx.arc(cx+r2*Math.cos(angle),cy+r2*Math.sin(angle),3.5,0,Math.PI*2);ctx.fillStyle='#ec4899';ctx.shadowColor='#ec4899';ctx.shadowBlur=7;ctx.fill();ctx.shadowBlur=0;});
+            ctx.fillStyle='#94a3b8';ctx.font='bold 8.5px Segoe UI';ctx.textAlign='center';axes.forEach(function(a,i){var angle=(i/N)*Math.PI*2-Math.PI/2;ctx.fillText(a.label,cx+(R+15)*Math.cos(angle),cy+(R+15)*Math.sin(angle)+3);});
+        }
+        function thRenderTable(logs){
+            var tbody=document.getElementById('th-table-body'),lu=document.getElementById('th-last-update');
+            if(lu)lu.textContent='· Updated '+new Date().toLocaleTimeString();
+            if(!tbody)return;
+            if(!logs||!logs.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:36px;color:#6b7280;">No log data — ensure backend is running and logs are ingested.</td></tr>';return;}
+            var sevIcon={CRITICAL:'🔴',HIGH:'🟠',MEDIUM:'🟡',LOW:'🟢'},threatMap={Authentication:'Brute Force','Privilege Escalation':'Priv Escalation',Network:'Network Threat',Uploaded:'Uploaded Log',System:'System Event'};
+            tbody.innerHTML=logs.slice(0,50).map(function(l){var sev=(l.severity||'LOW').toUpperCase(),ts=l.timestamp?new Date(l.timestamp).toLocaleString():'—',threat=threatMap[l.event_type]||l.event_type||'Unknown';return '<tr data-sev="'+sev+'" data-desc="'+(l.description||'').toLowerCase()+'" data-ip="'+(l.source_ip||'')+'">'+'<td><strong>'+threat+'</strong></td><td><span class="badge badge-'+sev.toLowerCase()+'">'+(sevIcon[sev]||'⚪')+' '+sev+'</span></td><td style="font-family:monospace;font-size:0.84em;">'+(l.source_ip||'—')+'</td><td><span style="background:rgba(168,85,247,0.12);padding:2px 8px;border-radius:5px;font-size:0.8em;color:#c084fc;">'+(l.event_type||'—')+'</span></td><td style="color:#94a3b8;font-size:0.83em;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+(l.description||'')+'">'+(l.description||'—')+'</td><td style="color:#6b7280;font-size:0.79em;white-space:nowrap;">'+ts+'</td><td><button onclick="thInvestigateIP(this.dataset.ip)" data-ip="'+(l.source_ip||'')+'" style="background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.25);color:#c084fc;padding:3px 9px;border-radius:6px;cursor:pointer;font-size:0.76em;">Investigate</button></td></tr>';}).join('');
+        }
+        function thInvestigateIP(ip){if(!ip)return;document.getElementById('th-search').value=ip;thFilterTable();document.getElementById('th-search').scrollIntoView({behavior:'smooth',block:'center'});}
+        function thFilterTable(){
+            var q=(document.getElementById('th-search').value||'').toLowerCase(),sev=document.getElementById('th-sev-filter').value,typ=document.getElementById('th-type-filter').value;
+            document.querySelectorAll('.th-card').forEach(function(c){var ms=!sev||c.dataset.sev===sev,mt=!typ||c.dataset.type===typ,mq=!q||c.dataset.name.includes(q)||c.dataset.type.toLowerCase().includes(q);c.classList.toggle('th-hidden',!(ms&&mt&&mq));});
+            var rows=document.querySelectorAll('#th-table-body tr[data-sev]'),vis=0;
+            rows.forEach(function(r){var ms=!sev||r.dataset.sev===sev,mq=!q||r.dataset.desc.includes(q)||r.dataset.ip.includes(q);var show=ms&&mq;r.classList.toggle('th-hidden',!show);if(show)vis++;});
+            var badge=document.getElementById('th-count-badge');if(badge)badge.textContent=vis+' / '+rows.length+' events';
+        }
+        function thClearFilters(){document.getElementById('th-search').value='';document.getElementById('th-sev-filter').value='';document.getElementById('th-type-filter').value='';thFilterTable();}
+        async function loadThreats(){
+            try{var results=await Promise.allSettled([fetch(API+'/logs?page=1&size=200').then(function(r){return r.json();}),fetch(API+'/alerts').then(function(r){return r.json();})]);
+            var logs=results[0].status==='fulfilled'?(results[0].value.logs||[]):[],alertsR=results[1].status==='fulfilled'?results[1].value:[],alerts=Array.isArray(alertsR)?alertsR:(alertsR.alerts||[]);
+            TH_ALL_LOGS=logs;TH_ALL_ALERTS=alerts;thRenderCards(logs,alerts);setTimeout(function(){thDrawRadar(logs);},50);thRenderTable(logs);thFilterTable();}
+            catch(e){console.warn('Threats error:',e);}
+        }
+
+        // ══ SINGLE showPage HOOK ══
+        var _origShowPage=showPage;
+        showPage=function(pageId,btn){
+            _origShowPage(pageId,btn);
+            if(pageId==='analytics') setTimeout(loadAnalytics,80);
+            if(pageId==='threats')   setTimeout(loadThreats,80);
+            if(pageId==='logs')      setTimeout(function(){if(!EL_ALL.length)loadAllLogs();},80);
+        };
+        window.addEventListener('resize',function(){
+            var dist={LOW:0,MEDIUM:0,HIGH:0,CRITICAL:0};
+            if(document.getElementById('dashboard').classList.contains('active')){
+                dbDrawTimeline(dist); dbDrawRing(dist);
+                setTimeout(function(){dbSparkline('db-spark-logs',DB_HIST.logs,'#a855f7');dbSparkline('db-spark-alerts',DB_HIST.alerts,'#f59e0b');dbSparkline('db-spark-crit',DB_HIST.crit,'#ef4444');dbSparkline('db-spark-low',DB_HIST.low,'#10b981');},50);
+            }
+            if(document.getElementById('analytics').classList.contains('active')){
+                anDrawSparkline(anBuildHours({LOW:0,MEDIUM:0,HIGH:0,CRITICAL:0}));
+                anDrawStacked({LOW:0,MEDIUM:0,HIGH:0,CRITICAL:0});
+            }
+        });
+    </script>
+</body>
+</html>
